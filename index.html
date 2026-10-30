@@ -1,0 +1,1845 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design and motion principles</title>
+<style>
+/* Tokens */
+:root {
+  color-scheme: light dark;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 72px;
+  --r-float: 16px; --r-card: 10px; --r-pill: 999px;
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --dur-fast: 150ms; --dur-normal: 250ms; --dur-slow: 500ms; --stagger: 50ms;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --press: 0.97;
+  --s0: #f6f6f5; --s1: #ffffff; --s2: #efefed; --s3: #e5e5e2; --float: #ffffff;
+  --text: #1b1b1a; --text-muted: #5f5f5a; --text-faint: #74746f;
+  --accent: #2f5fe3; --accent-hover: #2650cc; --accent-ink: #ffffff;
+  --danger: #a3231c;
+  --shadow-float: 0 12px 32px rgba(20, 20, 20, 0.14), 0 2px 6px rgba(20, 20, 20, 0.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --s0: #111110; --s1: #1a1a19; --s2: #242423; --s3: #2f2f2d; --float: #2a2a28;
+    --text: #ededeb; --text-muted: #a3a39e; --text-faint: #86867f;
+    --accent: #7b97ff; --accent-hover: #93abff; --accent-ink: #0b1220;
+    --danger: #ff9b93;
+    --shadow-float: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+}
+body {
+  --slow: 1;
+  --t-fast: calc(var(--dur-fast) * var(--slow));
+  --t-normal: calc(var(--dur-normal) * var(--slow));
+  --t-slow: calc(var(--dur-slow) * var(--slow));
+}
+body[data-slow] { --slow: 5; }
+
+/* Base */
+* { box-sizing: border-box; margin: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: var(--sp-6); }
+body { background: var(--s0); color: var(--text); font: 400 16px/1.55 var(--font-sans); -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+code, .mono { font-family: var(--font-mono); font-size: 13px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button { font: inherit; color: inherit; }
+
+/* Shell */
+.shell { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: var(--sp-7); max-width: 1240px; margin: 0 auto; padding: 0 var(--sp-6); }
+.side { position: sticky; top: 0; align-self: start; height: 100vh; padding: var(--sp-6) 0; display: flex; flex-direction: column; gap: var(--sp-5); }
+.side h1 { font-size: 16px; font-weight: 500; }
+.side nav { display: grid; gap: var(--sp-1); }
+.side nav a { padding: var(--sp-2) var(--sp-3); border-radius: var(--r-card); color: var(--text-muted); font-size: 14px; text-decoration: none; transition: background-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out); }
+.side nav a[aria-current="true"] { background: var(--s2); color: var(--text); }
+.side .files { margin-top: auto; display: grid; gap: var(--sp-1); font-size: 13px; color: var(--text-muted); }
+main { padding: var(--sp-7) 0 var(--sp-8); min-width: 0; }
+
+/* Layer switch */
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-1); padding: var(--sp-1); background: var(--s2); border-radius: var(--r-pill); }
+.seg button { border: 0; background: none; height: 28px; border-radius: var(--r-pill); font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: background-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out); }
+.seg button[aria-checked="true"] { background: var(--accent); color: var(--accent-ink); }
+.seg button:active { transform: scale(var(--press)); }
+
+/* Sections and principles */
+.hero { padding-bottom: var(--sp-5); }
+.hero h2 { font-size: 44px; line-height: 1.1; font-weight: 500; }
+.hero p { margin-top: var(--sp-4); max-width: 56ch; color: var(--text-muted); font-size: 18px; }
+section { padding-top: var(--sp-7); }
+section > h2 { font-size: 32px; line-height: 1.15; font-weight: 500; }
+section > .lede { margin-top: var(--sp-2); max-width: 60ch; color: var(--text-muted); }
+.p { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--sp-6); padding: var(--sp-6) 0 0; align-items: start; }
+.p h3 { font-size: 20px; line-height: 1.3; font-weight: 500; }
+.p .text > p { margin-top: var(--sp-2); font-size: 15px; color: var(--text-muted); }
+.eyebrow { display: none; font-size: 12px; color: var(--text-faint); margin-bottom: var(--sp-1); }
+body[data-layer="editor"] [data-editor] .eyebrow { display: block; }
+body:not([data-layer="editor"]) [data-editor] { display: none; }
+@media (max-width: 900px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 var(--sp-4); }
+  .side { position: static; height: auto; padding-bottom: 0; }
+  .side nav { grid-auto-flow: column; overflow-x: auto; }
+  .side .files { display: none; }
+  .p { grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
+  .hero h2 { font-size: 32px; }
+}
+
+/* Specimens */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+@media (max-width: 560px) { .pair { grid-template-columns: 1fr; } }
+.ex figcaption { font-size: 12px; color: var(--text-faint); margin-bottom: var(--sp-2); }
+.pair .ex { display: flex; flex-direction: column; }
+.pair .ex-body { flex: 1; }
+.ex-body { background: var(--s1); border-radius: var(--r-card); padding: var(--sp-4); }
+.ex-body + .ex-body { margin-top: var(--sp-3); }
+.note { margin-top: var(--sp-3); font-size: 13px; color: var(--text-muted); }
+.bar { height: 8px; border-radius: 4px; background: var(--s3); }
+.w40 { width: 40%; } .w60 { width: 60%; } .w90 { width: 90%; }
+.grp { display: grid; gap: var(--sp-2); }
+.stack-do { display: grid; gap: var(--sp-5); }
+.stack-even { display: grid; gap: var(--sp-3); }
+.rows { display: grid; }
+.row { display: grid; grid-template-columns: 16px 1fr auto; gap: var(--sp-3); align-items: center; height: 32px; font-size: 14px; }
+.row .n { font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; text-align: right; color: var(--text-muted); }
+.row .ico { color: var(--text-muted); }
+button.row { width: 100%; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.row.sel { background: var(--s2); border-radius: var(--r-card); margin: 0 calc(var(--sp-2) * -1); padding: 0 var(--sp-2); }
+.row.sel { grid-template-columns: 16px 1fr auto; }
+.messy .row:nth-child(1) { height: 28px; }
+.messy .row:nth-child(2) { height: 40px; }
+.messy .row:nth-child(2) .ico { margin-left: 6px; }
+.messy .row:nth-child(3) .ico { margin-top: -3px; }
+.messy .row .n { text-align: left; font-family: var(--font-sans); }
+.ico { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.chip { height: 24px; padding: 0 var(--sp-3); border-radius: var(--r-pill); background: var(--s2); font-size: 13px; display: inline-flex; align-items: center; white-space: nowrap; }
+.clip { display: flex; gap: var(--sp-2); overflow: hidden; }
+.narrow { max-width: 180px; }
+.stage-note { margin-top: var(--sp-3); }
+.stat { display: flex; justify-content: space-between; font-size: 14px; padding: var(--sp-1) 0; }
+.stat span:last-child { font-family: var(--font-mono); font-size: 13px; }
+.c-read { color: var(--text); } .c-muted { color: var(--text-muted); } .c-faint { color: var(--text-faint); font-size: 12px; }
+pre { font-family: var(--font-mono); font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+pre .no { color: var(--text-faint); }
+.float { background: var(--float); border-radius: var(--r-card); box-shadow: var(--shadow-float); padding: var(--sp-1); }
+.float .item { padding: var(--sp-2) var(--sp-3); font-size: 14px; border-radius: 6px; }
+.float .item.sel { background: var(--s2); }
+.tip { display: inline-block; background: var(--float); box-shadow: var(--shadow-float); border-radius: 6px; padding: var(--sp-1) var(--sp-2); font-size: 12px; margin-bottom: var(--sp-2); }
+
+/* Controls */
+.btn { height: 32px; padding: 0 var(--sp-4); border: 0; border-radius: var(--r-pill); background: var(--s2); color: var(--text); font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn:active, .btn.is-pressed { transform: scale(var(--press)); }
+.btn[aria-pressed="true"], .btn.is-selected { background: var(--accent); color: var(--accent-ink); }
+.btn:disabled, .btn.is-disabled { background: var(--s2); color: var(--text-faint); cursor: not-allowed; transform: none; }
+.btn.is-hover { background: var(--s3); }
+.btn.icon { width: 32px; padding: 0; display: inline-grid; place-items: center; }
+@media (hover: hover) {
+  .btn:hover:not(:disabled) { background: var(--s3); }
+  .btn.primary:hover:not(:disabled), .btn[aria-pressed="true"]:hover { background: var(--accent-hover); }
+  .row.sel, .pick .row:hover { background: var(--s2); }
+}
+.btn.is-focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btns { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; }
+.sw { width: 40px; height: 24px; border: 0; border-radius: var(--r-pill); background: var(--s3); position: relative; cursor: pointer; flex: none; transition: background-color var(--t-fast) var(--ease-out); }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--text-faint); transition: transform var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out); }
+.sw[aria-checked="true"] { background: var(--accent); }
+.sw[aria-checked="true"]::after { transform: translateX(16px); background: var(--accent-ink); }
+.tog { display: inline-flex; align-items: center; gap: var(--sp-2); font-size: 14px; }
+.tipwrap { position: relative; display: inline-block; }
+.tipwrap .tip { position: absolute; bottom: calc(100% + var(--sp-1)); left: 50%; transform: translateX(-50%); margin: 0; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity var(--t-fast) var(--ease-out); }
+.tipwrap:focus-within .tip { opacity: 1; }
+@media (hover: hover) { .tipwrap:hover .tip { opacity: 1; } }
+
+/* Fields used in specimens */
+.field { display: grid; gap: var(--sp-2); }
+.field label { font-size: 13px; color: var(--text-muted); }
+.input { height: 32px; border: 0; border-radius: var(--r-card); background: var(--s2); padding: 0 var(--sp-3); font: inherit; font-size: 14px; color: var(--text); width: 100%; }
+.input::placeholder { color: var(--text-faint); }
+.swatches { display: flex; gap: var(--sp-2); }
+.swatches i { width: 20px; height: 20px; border-radius: 50%; display: block; }
+.slider { height: 4px; border-radius: 2px; background: var(--s3); position: relative; }
+.slider::before { content: ""; position: absolute; inset: 0 20% 0 0; background: var(--accent); border-radius: 2px; }
+.slider::after { content: ""; position: absolute; top: -6px; left: calc(80% - 8px); width: 16px; height: 16px; border-radius: 50%; background: var(--accent); }
+.space-between { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; }
+
+/* Slop */
+.slop { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); margin-top: var(--sp-6); }
+.slop div { background: var(--s1); border-radius: var(--r-card); padding: var(--sp-4); }
+.slop h3 { font-size: 16px; font-weight: 500; }
+.slop p { margin-top: var(--sp-1); font-size: 14px; color: var(--text-muted); }
+@media (max-width: 700px) { .slop { grid-template-columns: 1fr; } }
+
+/* Motion */
+.toolbar { display: flex; flex-wrap: wrap; gap: var(--sp-5); margin-top: var(--sp-5); }
+.stage { position: relative; height: 320px; border-radius: var(--r-float); background: var(--s1); overflow: hidden; margin-top: var(--sp-4); }
+.stage-main { padding: var(--sp-5); display: grid; gap: var(--sp-4); align-content: start; transition: transform var(--t-fast) var(--ease-drawer); }
+.stage.drawer-open .stage-main { transform: translateX(calc(var(--sp-3) * -1)); transition-duration: var(--t-normal); }
+.stage-main .bar { height: 12px; }
+.pop, .drawer, .dialog { opacity: 0; visibility: hidden; transition: opacity var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out), visibility 0s linear var(--t-fast); }
+.pop.open, .drawer.open, .dialog.open { opacity: 1; visibility: visible; transform: none; transition: opacity var(--t-normal) var(--ease-out), transform var(--t-normal) var(--ease-out), visibility 0s; }
+.drawer { transition-timing-function: var(--ease-drawer), var(--ease-drawer), linear; }
+.pop { position: absolute; left: var(--sp-5); top: 72px; width: 180px; transform: scale(0.95); transform-origin: top left; }
+.drawer { position: absolute; top: 0; right: 0; bottom: 0; width: 220px; padding: var(--sp-5); background: var(--float); box-shadow: var(--shadow-float); transform: translateX(100%); display: grid; gap: var(--sp-3); align-content: start; }
+.drawer.open { transition-property: opacity, transform, visibility; transition-timing-function: var(--ease-drawer), var(--ease-drawer), linear; }
+.dialog-wrap { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.dialog { width: 260px; padding: var(--sp-5); background: var(--float); box-shadow: var(--shadow-float); border-radius: var(--r-float); transform: scale(0.96); transform-origin: center; display: grid; gap: var(--sp-3); }
+.dialog.open { pointer-events: auto; }
+.stage h4 { font-size: 15px; font-weight: 500; }
+body[data-reduced] .mv { transform: none !important; }
+@media (prefers-reduced-motion: reduce) { .mv { transform: none !important; } }
+
+.rp { transition: transform var(--t-slow) var(--ease-out), opacity var(--t-slow) var(--ease-out); }
+.reset { transition: none !important; }
+.track { height: 24px; position: relative; }
+.track + .track { margin-top: var(--sp-3); }
+.track .lbl { position: absolute; left: var(--sp-3); top: 0; line-height: 24px; font-size: 12px; color: var(--text-faint); }
+.dot { position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); transform: translateX(0); }
+.dot.go { transform: translateX(var(--dist, 200px)); }
+.dot.e-out { transition: transform var(--t-slow) var(--ease-out); }
+.dot.e-io { transition: transform var(--t-slow) var(--ease-in-out); }
+.dot.e-dr { transition: transform var(--t-slow) var(--ease-drawer); }
+.dot.e-in { transition: transform var(--t-slow) cubic-bezier(0.42, 0, 1, 1); background: var(--text-faint); }
+.track .rail { position: absolute; left: 0; right: 0; top: 11px; height: 2px; background: var(--s2); border-radius: 1px; }
+.track .lbl { z-index: 1; left: 36px; }
+.curves { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-3); margin-bottom: var(--sp-4); }
+.curves svg { width: 100%; aspect-ratio: 1; display: block; background: var(--s2); border-radius: var(--r-card); }
+.curves path { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+.curves .avoid path { stroke: var(--text-faint); }
+.curves span { display: block; margin-top: var(--sp-1); font-size: 12px; color: var(--text-muted); }
+.timebar { height: 12px; border-radius: 6px; background: var(--accent); transform: scaleX(0); transform-origin: left; }
+.timebar.go { transform: scaleX(1); }
+.tb-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: var(--sp-1); }
+.tb-wrap + .tb-wrap { margin-top: var(--sp-3); }
+.enter { display: flex; gap: var(--sp-5); align-items: center; }
+.sq { width: 72px; height: 72px; border-radius: var(--r-card); background: var(--accent); opacity: 0; }
+.sq.good { transform: scale(0.95); }
+.sq.bad { transform: scale(0); background: var(--text-faint); }
+.sq.go { opacity: 1; transform: none; }
+.replay { margin-top: var(--sp-3); }
+.freq { display: grid; gap: var(--sp-2); }
+.freq .fr { display: grid; grid-template-columns: 96px minmax(0, 1fr) 56px; grid-template-areas: "b ex m" "b mo m"; column-gap: var(--sp-4); row-gap: var(--sp-1); align-items: center; background: var(--s1); border-radius: var(--r-card); padding: var(--sp-3) var(--sp-4); font-size: 14px; }
+.freq .fr b { font-weight: 500; grid-area: b; }
+.freq .fr .ex-t { grid-area: ex; }
+.freq .fr .mo { grid-area: mo; color: var(--text-faint); font-size: 13px; }
+.freq .fr .meter { grid-area: m; }
+.freq .fr .ex-t, .freq .fr .mo { color: var(--text-muted); }
+.freq .meter { height: 6px; border-radius: 3px; background: var(--s3); position: relative; }
+.freq .meter i { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: var(--accent); }
+.tokens { display: grid; gap: var(--sp-2); margin-top: var(--sp-5); }
+.tokens .tr { display: grid; grid-template-columns: 160px 1fr 1.4fr; gap: var(--sp-4); align-items: baseline; background: var(--s1); border-radius: var(--r-card); padding: var(--sp-3) var(--sp-4); font-size: 14px; }
+.tokens .tr span:nth-child(1) { font-weight: 500; }
+.tokens .tr span:nth-child(2) { font-family: var(--font-mono); font-size: 13px; }
+.tokens .tr span:nth-child(3) { color: var(--text-muted); }
+@media (max-width: 700px) { .tokens .tr { grid-template-columns: 1fr; gap: var(--sp-1); } }
+.durs { margin-top: var(--sp-5); }
+
+/* Checklist */
+.progress { margin-top: var(--sp-4); display: flex; gap: var(--sp-4); align-items: center; font-size: 14px; color: var(--text-muted); }
+.progress .mono { font-variant-numeric: tabular-nums; color: var(--text); }
+.checks { list-style: none; padding: 0; margin-top: var(--sp-4); display: grid; gap: var(--sp-1); }
+.checks li { display: flex; }
+.checks label { display: flex; gap: var(--sp-3); align-items: center; width: 100%; padding: var(--sp-2) var(--sp-3); border-radius: var(--r-card); cursor: pointer; font-size: 15px; transition: background-color var(--t-fast) var(--ease-out); }
+@media (hover: hover) { .checks label:hover { background: var(--s1); } }
+.checks input { position: absolute; opacity: 0; pointer-events: none; }
+.box { width: 18px; height: 18px; border-radius: 5px; background: var(--s3); flex: none; position: relative; transition: background-color var(--t-fast) var(--ease-out); }
+.box::after { content: ""; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid var(--accent-ink); border-width: 0 2px 2px 0; transform: rotate(45deg); opacity: 0; transition: opacity var(--t-fast) var(--ease-out); }
+.checks input:checked + .box { background: var(--accent); }
+.checks input:checked + .box::after { opacity: 1; }
+.checks input:focus-visible + .box { outline: 2px solid var(--accent); outline-offset: 2px; }
+.checks .group { margin-top: var(--sp-5); font-size: 13px; color: var(--text-faint); padding: 0 var(--sp-3); }
+.sources { margin-top: var(--sp-8); font-size: 14px; color: var(--text-muted); max-width: 70ch; }
+.sources ul { margin-top: var(--sp-3); padding-left: var(--sp-5); display: grid; gap: var(--sp-2); }
+.sources h2 { font-size: 20px; font-weight: 500; color: var(--text); }
+
+/* How to decide */
+.principles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); margin-top: var(--sp-5); }
+.principles article { background: var(--s1); border-radius: var(--r-card); padding: var(--sp-4); }
+.principles h3 { font-size: 16px; font-weight: 500; }
+.principles p { margin-top: var(--sp-1); font-size: 14px; color: var(--text-muted); }
+@media (max-width: 700px) { .principles { grid-template-columns: 1fr; } }
+
+/* Press, drag and throw */
+.press-log { font-size: 13px; color: var(--text-muted); min-width: 64px; }
+.btn.late { transition-delay: 180ms; }
+.drag-track, .flick-track { position: relative; height: 72px; border-radius: var(--r-card); background: var(--s2); overflow: hidden; touch-action: none; }
+.drag-card, .flick-card { position: absolute; top: 12px; left: 12px; width: 88px; height: 48px; border-radius: var(--r-card); background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-size: 13px; font-weight: 500; cursor: grab; user-select: none; touch-action: none; }
+.flick-card { width: 96px; }
+.drag-card:active, .flick-card:active { cursor: grabbing; }
+.drag-card:focus-visible, .flick-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.readout { margin-top: var(--sp-2); display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); }
+.readout .mono { color: var(--text); }
+
+/* Undo and message */
+.undo { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); font-size: 14px; }
+.undo-msg { margin-top: var(--sp-3); min-height: 24px; display: flex; align-items: center; gap: var(--sp-3); font-size: 13px; color: var(--text-muted); }
+.undo-msg .btn { height: 24px; padding: 0 var(--sp-3); font-size: 13px; }
+.field-err { font-size: 13px; color: var(--danger); }
+[hidden] { display: none !important; }
+
+/* Type per size */
+.type-demo h4 { font-size: 32px; line-height: 1.05; letter-spacing: -0.02em; font-weight: 500; }
+.type-demo p { margin-top: var(--sp-2); font-size: 15px; line-height: 1.55; color: var(--text-muted); }
+.type-demo.bad h4 { line-height: 1.55; letter-spacing: 0.02em; }
+.type-demo.bad p { line-height: 1.05; letter-spacing: -0.04em; }
+
+/* Springs and paths */
+.spring-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+@media (max-width: 560px) { .spring-row { grid-template-columns: 1fr; } }
+.spring-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-faint); margin-bottom: var(--sp-2); }
+.spring-lane { position: relative; height: 44px; border-radius: var(--r-card); background: var(--s2); overflow: hidden; }
+.spring-box { position: absolute; top: 6px; left: 6px; width: 32px; height: 32px; border-radius: 8px; background: var(--accent); }
+.spring-box.bounce { background: var(--text); }
+.paths { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+@media (max-width: 560px) { .paths { grid-template-columns: 1fr; } }
+.lane { position: relative; height: 104px; border-radius: var(--r-card); background: var(--s2); overflow: hidden; }
+.path-panel { position: absolute; top: 12px; left: 12px; width: 72px; height: 80px; border-radius: var(--r-card); background: var(--s1); box-shadow: var(--shadow-float); transform: translateX(160%); opacity: 0; transition: transform var(--t-normal) var(--ease-out), opacity var(--t-normal) var(--ease-out); }
+.path-panel.in { transform: none; opacity: 1; }
+.path-panel.out-x { transform: translateX(160%); opacity: 0; }
+.path-panel.out-y { transform: translateY(160%); opacity: 0; }
+.path-panel.reset { transition: none !important; }
+.lane-cap { margin-top: var(--sp-2); font-size: 12px; color: var(--text-faint); }
+body[data-reduced] .path-panel { transform: none !important; }
+@media (prefers-reduced-motion: reduce) { .path-panel { transform: none !important; } }
+
+/* Wayfinding */
+.mini-bar { display: flex; align-items: center; gap: var(--sp-2); }
+.mini-bar .btn.icon { width: 28px; height: 28px; }
+h2, h3, h4 { text-wrap: balance; }
+.p .text > p, .lede, .note { text-wrap: pretty; }
+.theme-switching *, .theme-switching *::before, .theme-switching *::after { transition: none !important; }
+.stack-pairs { display: grid; gap: var(--sp-4); }
+.play { width: 48px; height: 48px; border-radius: 50%; background: var(--s2); display: grid; place-items: center; }
+.play svg { width: 16px; height: 16px; fill: var(--text); }
+.play.optical svg { transform: translateX(2px); }
+.ibtn { display: inline-flex; align-items: center; gap: var(--sp-2); padding: 0 var(--sp-4) 0 var(--sp-3); }
+.ibtn.even { padding: 0 var(--sp-4); }
+.nest { background: var(--s2); border-radius: var(--r-float); padding: var(--sp-2); }
+.nest > div { background: var(--s3); height: 64px; border-radius: calc(var(--r-float) - var(--sp-2)); }
+.nest.bad > div { border-radius: var(--r-float); }
+.img { aspect-ratio: 4 / 3; border-radius: var(--r-card); background: var(--s1); display: grid; place-items: center; }
+.img i { width: 36%; aspect-ratio: 1; border-radius: 50%; background: var(--s3); }
+.img.edge { outline: 1px solid rgb(0 0 0 / 0.08); outline-offset: -1px; }
+@media (prefers-color-scheme: dark) { .img.edge { outline-color: rgb(255 255 255 / 0.08); } }
+.pal { display: flex; align-items: center; justify-content: space-between; padding: var(--sp-3); border-radius: var(--r-card); font-size: 14px; }
+.pal + .pal { margin-top: var(--sp-2); }
+.pal i { width: 16px; height: 16px; border-radius: 50%; }
+.ell { display: block; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+.hits { display: flex; gap: var(--sp-5); align-items: flex-end; flex-wrap: wrap; }
+.hits > div { display: grid; gap: var(--sp-2); justify-items: start; }
+.hit { width: var(--h); height: var(--h); border-radius: var(--r-card); background: var(--s2); display: grid; place-items: center; }
+.swap { position: relative; width: 16px; height: 16px; flex: none; }
+.swap .ico { position: absolute; inset: 0; transition: opacity var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out), filter var(--t-fast) var(--ease-out); }
+.swap .ico.out { opacity: 0; transform: scale(0.25); filter: blur(4px); }
+.xcard { height: 48px; margin-bottom: var(--sp-3); border-radius: var(--r-card); background: var(--s2); display: grid; place-items: center; font-size: 14px; opacity: 0; transform: translateY(4px); filter: blur(4px); visibility: hidden; transition: opacity var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out), filter var(--t-fast) var(--ease-out), visibility 0s linear var(--t-fast); }
+.xcard.open { opacity: 1; transform: none; filter: none; visibility: visible; transition: opacity var(--t-normal) var(--ease-out), transform var(--t-normal) var(--ease-out), filter 0s, visibility 0s; }
+.stag { display: grid; gap: var(--sp-2); }
+.stag .rp { height: 12px; border-radius: 6px; background: var(--s3); opacity: 0; transform: translateY(6px); transition: opacity var(--t-normal) var(--ease-out), transform var(--t-normal) var(--ease-out); transition-delay: calc(var(--g) * var(--stagger) * var(--slow)); }
+.stag .rp.go { opacity: 1; transform: none; }
+body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced] .stag .rp { transform: none; filter: none; }
+@media (prefers-reduced-motion: reduce) { .swap .ico.out, .xcard, .stag .rp { transform: none; filter: none; } }
+</style>
+</head>
+<body data-layer="core">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></symbol>
+  <symbol id="i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></symbol>
+  <symbol id="i-download" viewBox="0 0 16 16"><path d="M8 2v8M4.5 7L8 10.5 11.5 7M3 13h10"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 16 16"><path d="M2 9l1.8-5.5h8.4L14 9v4H2zM2 9h3.5l.8 1.5h3.4l.8-1.5H14"/></symbol>
+  <symbol id="i-file" viewBox="0 0 16 16"><path d="M4 2h5l3 3v9H4zM9 2v3h3"/></symbol>
+  <symbol id="i-send" viewBox="0 0 16 16"><path d="M14 2L2 7l4.5 2L9 14zM14 2L6.5 9"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 16 16"><path d="M3 4.5h10M6 4.5V3h4v1.5M4.5 4.5l.5 9h6l.5-9"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 16 16"><rect x="5" y="5" width="8.5" height="8.5" rx="1.5"/><path d="M10.5 5V3.5A1.5 1.5 0 0 0 9 2H3.5A1.5 1.5 0 0 0 2 3.5V9a1.5 1.5 0 0 0 1.5 1.5H5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></symbol>
+  <symbol id="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11L13 8z" stroke="none"/></symbol>
+  <symbol id="i-back" viewBox="0 0 16 16"><path d="M9.5 3.5L5 8l4.5 4.5"/></symbol>
+</svg>
+
+<div class="shell">
+  <aside class="side">
+    <h1>Design and motion principles</h1>
+    <div class="seg" role="radiogroup" aria-label="Principle layers">
+      <button type="button" role="radio" aria-checked="true" data-layer-btn="core">Core</button>
+      <button type="button" role="radio" aria-checked="false" data-layer-btn="editor">+ Editor</button>
+    </div>
+    <nav aria-label="Sections">
+      <a href="#decide">How to decide</a>
+      <a href="#layout">Layout and spacing</a>
+      <a href="#colour">Colour and surfaces</a>
+      <a href="#type">Type, words and icons</a>
+      <a href="#interaction">Interaction and states</a>
+      <a href="#a11y">Accessibility</a>
+      <a href="#slop">Slop to avoid</a>
+      <a href="#motion">Motion</a>
+      <a href="#values">Motion values</a>
+      <a href="#checklist">Checklist</a>
+      <a href="#build">Build notes</a>
+    </nav>
+    <div class="files">
+      <a href="principles.md">principles.md</a>
+      <a href="principles-editor.md">principles-editor.md</a>
+    </div>
+  </aside>
+
+  <main>
+    <header class="hero">
+      <h2>Design and motion principles</h2>
+      <p>How an interface looks, reads, behaves and moves. Eight principles decide what to build; the rules below say how. The Do specimens on this page follow them. Switch on the editor layer to add the rules for editors and workspaces.</p>
+    </header>
+
+    <!-- DECIDE -->
+    <section id="decide">
+      <h2>How to decide</h2>
+      <p class="lede">When two rules pull against each other, these eight break the tie. They decide what to build as much as how it looks.</p>
+      <div class="principles">
+        <article><h3>Purpose</h3><p>Every feature asks for people’s time, attention and trust. Spend that budget only where it pays, and decide what not to build.</p></article>
+        <article><h3>Agency</h3><p>Offer choices, keep a way back, and make undo the safety net. Confirm only what is costly and can’t be undone.</p></article>
+        <article><h3>Responsibility</h3><p>Ask for private data only when it’s needed, only for what’s needed, and say what happens to it. Anticipate how the product could mislead or harm.</p></article>
+        <article><h3>Familiarity</h3><p>Build on what people know, and keep the same-looking thing in the same place behaving the same way. Break a pattern only when the new one is better.</p></article>
+        <article><h3>Flexibility</h3><p>One layout rarely fits every device, language and pair of eyes. Adapt to the platform and let people adjust what they see.</p></article>
+        <article><h3>Simplicity, not minimalism</h3><p>Cut what doesn’t serve the purpose; hiding everything to look clean is not simple. The common path comes first, rare options one step deeper.</p></article>
+        <article><h3>Craft</h3><p>Every spacing, timing and alignment value is a deliberate choice you can defend. Jitter and misalignment read as carelessness.</p></article>
+        <article><h3>Delight</h3><p>The result of getting the other seven right, not confetti on top. Decide the feeling you want, then reinforce it everywhere.</p></article>
+      </div>
+    </section>
+
+    <!-- LAYOUT -->
+    <section id="layout">
+      <h2>Layout and spacing</h2>
+
+      <article class="p">
+        <div class="text">
+          <h3>Space shows what belongs together</h3>
+          <p>The gap between groups is at least twice the gap inside one, like 8px inside and 16px between. Gaps and padding come from a small spacing scale, never a number typed into one component.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="stack-do">
+            <div class="grp"><div class="bar w60"></div><div class="bar w90"></div><div class="bar w40"></div></div>
+            <div class="grp"><div class="bar w90"></div><div class="bar w40"></div></div>
+          </div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="stack-even">
+            <div class="bar w60"></div><div class="bar w90"></div><div class="bar w40"></div><div class="bar w90"></div><div class="bar w40"></div>
+          </div></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>A control sits with what it changes</h3>
+          <p>Place it next to the thing it affects and arrange controls to mirror what they change. If a label has to explain the mapping, move the control.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="space-between">
+            <span>Email notifications</span><button class="sw" role="switch" aria-checked="true" aria-label="Email notifications"></button>
+          </div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body">
+            <div class="btns" style="justify-content:flex-end"><button class="sw" role="switch" aria-checked="true" aria-label="Notifications"></button></div>
+            <div class="space-between" style="margin-top:var(--sp-6)"><span>Email notifications</span><span class="c-faint">On</span></div>
+            <div class="space-between" style="margin-top:var(--sp-3)"><span>Default view</span><span class="c-muted">List</span></div>
+          </div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Same thing, same size, same line</h3>
+          <p>Rows in one list share one height and one gap. Icons sit in one column, labels start on one line, numbers align right. Line things up by eye, not by the numbers: a triangle needs a small nudge to look centred, and a button gets less padding on its icon side.</p>
+        </div>
+        <div class="stack-pairs"><div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="rows">
+            <div class="row"><svg class="ico"><use href="#i-inbox"/></svg><span>Inbox</span><span class="n">12</span></div>
+            <div class="row"><svg class="ico"><use href="#i-file"/></svg><span>Drafts</span><span class="n">3</span></div>
+            <div class="row"><svg class="ico"><use href="#i-send"/></svg><span>Sent</span><span class="n">1,204</span></div>
+          </div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="rows messy">
+            <div class="row"><svg class="ico"><use href="#i-inbox"/></svg><span>Inbox</span><span class="n">12</span></div>
+            <div class="row"><svg class="ico"><use href="#i-file"/></svg><span>Drafts</span><span class="n">3</span></div>
+            <div class="row"><svg class="ico"><use href="#i-send"/></svg><span>Sent</span><span class="n">1,204</span></div>
+          </div></div></figure>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do: centred by eye</figcaption><div class="ex-body"><div class="btns" style="gap:var(--sp-4)"><span class="play optical"><svg><use href="#i-play"/></svg></span><button class="btn ibtn"><svg class="ico"><use href="#i-plus"/></svg>Add file</button></div></div></figure>
+          <figure class="ex"><figcaption>Avoid: centred by the numbers</figcaption><div class="ex-body"><div class="btns" style="gap:var(--sp-4)"><span class="play"><svg><use href="#i-play"/></svg></span><button class="btn ibtn even"><svg class="ico"><use href="#i-plus"/></svg>Add file</button></div></div></figure>
+        </div></div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Nothing scrolls sideways</h3>
+          <p>If something doesn’t fit, it wraps. Vertical scroll is fine. The exception is content that is wide by nature, like a data table or a map.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="chips narrow"><span class="chip">Design</span><span class="chip">Research</span><span class="chip">Engineering</span><span class="chip">Support</span></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="clip narrow"><span class="chip">Design</span><span class="chip">Research</span><span class="chip">Engineering</span><span class="chip">Support</span></div></div></figure>
+        </div>
+      </article>
+
+      <article class="p" data-editor>
+        <div class="text">
+          <div class="eyebrow">Editor</div>
+          <h3>A calm, dense tool</h3>
+          <p>A tool people work in for hours fits a lot on screen and stays steady: little layout variety, panels that keep their place and shape. The variety goes into the content.</p>
+        </div>
+        <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="rows pick">
+          <div class="row"><svg class="ico"><use href="#i-file"/></svg><span>Background</span><span class="n">100</span></div>
+          <div class="row sel"><svg class="ico"><use href="#i-file"/></svg><span>Headline</span><span class="n">80</span></div>
+          <div class="row"><svg class="ico"><use href="#i-file"/></svg><span>Photo</span><span class="n">100</span></div>
+          <div class="row"><svg class="ico"><use href="#i-file"/></svg><span>Caption</span><span class="n">64</span></div>
+          <div class="row"><svg class="ico"><use href="#i-file"/></svg><span>Logo</span><span class="n">100</span></div>
+        </div></div></figure>
+      </article>
+
+      <article class="p" data-editor>
+        <div class="text">
+          <div class="eyebrow">Editor</div>
+          <h3>Open beside, not instead</h3>
+          <p>Settings, menus and side panels open as trays next to what you clicked, so you never lose your place. Full screen swaps are for leaving the current task.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body">
+            <div style="display:grid;grid-template-columns:1fr 64px;gap:var(--sp-2);height:96px"><div class="bar" style="height:100%;width:auto"></div><div style="background:var(--s2);border-radius:var(--r-card)"></div></div>
+          </div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body">
+            <div style="background:var(--s2);border-radius:var(--r-card);height:96px;display:grid;place-items:center;font-size:12px;color:var(--text-faint)">Whole screen replaced</div>
+          </div></figure>
+        </div>
+      </article>
+
+      <article class="p" data-editor>
+        <div class="text">
+          <div class="eyebrow">Editor</div>
+          <h3>Group by what it changes</h3>
+          <p>Controls that change the same thing sit together in one section, not spread across cards.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp">
+            <div class="c-faint">Position</div>
+            <div class="space-between"><span>X</span><span class="mono">128.00</span></div>
+            <div class="space-between"><span>Y</span><span class="mono">64.50</span></div>
+            <div class="space-between"><span>Rotation</span><span class="mono">0.00</span></div>
+          </div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="stack-do" style="gap:var(--sp-4)">
+            <div class="space-between"><span>X</span><span class="mono">128.00</span></div>
+            <div class="space-between"><span>Opacity</span><span class="mono">80</span></div>
+            <div class="space-between"><span>Rotation</span><span class="mono">0.00</span></div>
+          </div></div></figure>
+        </div>
+      </article>
+
+      <article class="p" data-editor>
+        <div class="text">
+          <div class="eyebrow">Editor</div>
+          <h3>Panels never scroll sideways</h3>
+          <p>Core allows wide content like a table. A panel has no such exception: if something doesn’t fit, it wraps. Vertical scroll is fine.</p>
+        </div>
+        <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="chips narrow"><span class="chip">Multiply</span><span class="chip">Screen</span><span class="chip">Overlay</span><span class="chip">Darken</span></div></div></figure>
+      </article>
+    </section>
+
+    <!-- COLOUR -->
+    <section id="colour">
+      <h2>Colour and surfaces</h2>
+
+      <article class="p">
+        <div class="text">
+          <h3>Surfaces stay quiet</h3>
+          <p>Neutral surfaces with one accent. If the chrome draws the eye away from the main content, it is too loud.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp">
+            <div style="font-size:15px;font-weight:500">Team plan</div><div class="c-muted" style="font-size:14px">Three seats, billed monthly</div>
+            <div class="btns" style="margin-top:var(--sp-2)"><button class="btn primary">Add seat</button></div>
+          </div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp">
+            <div style="background:#f59e0b;color:#000;border-radius:6px;padding:6px 10px;font-size:13px">Limited offer</div>
+            <div style="background:#10b981;color:#000;border-radius:6px;padding:6px 10px;font-size:13px">Team plan</div>
+            <div style="background:#8b5cf6;color:#fff;border-radius:6px;padding:6px 10px;font-size:13px">Three seats</div>
+          </div></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>One accent, one job</h3>
+          <p>The accent is the brand colour. It marks what’s selected, switched on, or the main action. Call it accent, never primary. One primary button per view. Text on the accent uses its own ink colour, never grey.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-4)">
+            <div class="btns"><button class="btn is-selected" style="height:28px">Week</button><button class="btn" style="height:28px">Month</button></div>
+            <div class="tog"><button class="sw" role="switch" aria-checked="true" aria-labelledby="l-notify"></button><span id="l-notify">Notify me</span></div>
+            <div class="btns"><button class="btn primary">Save draft</button><button class="btn">Cancel</button></div>
+          </div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-3)">
+            <div class="btns"><button class="btn primary">Save</button><button class="btn primary">Publish</button><button class="btn primary">Share</button></div>
+            <div style="color:var(--accent);font-size:14px">Everything is a link now</div>
+          </div></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Three text roles</h3>
+          <p>One colour for what you read, a muted one for secondary text and icons, a faint one only for meta like counts. No in-between greys.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp">
+            <div class="c-read">Quarterly report</div><div class="c-muted" style="font-size:14px">Updated by Sam on Tuesday</div><div class="c-faint">3 comments</div>
+          </div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp">
+            <div>Quarterly report</div><div style="color:color-mix(in srgb, var(--text) 75%, var(--s1));font-size:14px">Updated by Sam on Tuesday</div><div style="color:color-mix(in srgb, var(--text) 55%, var(--s1));font-size:13px">3 comments</div><div style="color:color-mix(in srgb, var(--text) 40%, var(--s1));font-size:12px">Draft</div>
+          </div></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>A shadow means it floats</h3>
+          <p>Only things above the page get a shadow: menus, popovers, dialogs. Inside a surface, depth is a step lighter, never an outline or a divider. A selected row is a surface step, not a glow.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body">
+            <div class="rows pick"><div class="row" style="grid-template-columns:1fr"><span>Rename</span></div><div class="row sel" style="grid-template-columns:1fr"><span>Duplicate</span></div></div>
+            <div class="float" style="margin-top:var(--sp-3)"><div class="item">Move to folder</div><div class="item sel">Archive</div></div>
+          </div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body" style="padding:var(--sp-4)">
+            <div style="box-shadow:0 4px 12px rgba(0,0,0,.2);border-radius:8px;padding:8px 12px;font-size:14px;margin-bottom:8px">Rename</div>
+            <div style="box-shadow:0 4px 12px rgba(0,0,0,.2);border-radius:8px;padding:8px 12px;font-size:14px;border-bottom:1px solid #8884">Duplicate</div>
+          </div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Decoration has to do a job</h3>
+          <p>No glows, glass, blurred blobs, gradient text or emoji. A gradient is allowed only as a small tone shift inside one colour, never from one hue to another.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-3)"><div style="font-size:20px;font-weight:500">Welcome back</div><div class="btns"><button class="btn primary">Open project</button></div></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-3)"><div style="font-size:20px;font-weight:500;background:linear-gradient(90deg,#ec4899,#06b6d4);-webkit-background-clip:text;background-clip:text;color:transparent">Welcome back ✨</div><div class="btns"><button class="btn" style="background:#8b5cf6;color:#fff;box-shadow:0 0 18px #8b5cf6">Open project</button></div></div></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Nested corners are concentric</h3>
+          <p>The inner radius is the outer radius minus the padding between them, so the two curves run parallel.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="nest"><div></div></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="nest bad"><div></div></div></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Images get a hairline edge</h3>
+          <p>A 1px outline set 1px inside the image: black at 8% in light mode, white at 8% in dark. It stops a pale image bleeding into the surface. It’s the one border and the one tint allowed outside the ramp.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="img edge" role="img" aria-label="Example image with a hairline edge"><i></i></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="img" role="img" aria-label="Example image without an edge"><i></i></div></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Values come from tokens</h3>
+          <p>Colours, radii, spacing, durations and easings come from one set of tokens, named for their job, never for their value. Every step in a scale has a use. If a token is wrong, change the token.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><pre>padding: var(--sp-4);
+border-radius: var(--r-card);
+color: var(--color-text-muted);</pre></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><pre>padding: 13px;
+border-radius: 9px;
+color: var(--gray-500);</pre></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Dark mode is its own palette</h3>
+          <p>Build it on purpose instead of inverting light mode. Check contrast against the surface directly behind each element, not the page.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do: tuned</figcaption><div class="ex-body">
+            <div class="pal" style="background:#f6f6f5;color:#1b1b1a"><span>Light</span><i style="background:#2f5fe3"></i></div>
+            <div class="pal" style="background:#111110;color:#ededeb"><span>Dark</span><i style="background:#7b97ff"></i></div>
+          </div></figure>
+          <figure class="ex"><figcaption>Avoid: inverted</figcaption><div class="ex-body">
+            <div class="pal" style="background:#f6f6f5;color:#1b1b1a"><span>Light</span><i style="background:#2f5fe3"></i></div>
+            <div class="pal" style="background:#09090a;color:#e4e4e5"><span>Dark</span><i style="background:#d0a01c"></i></div>
+          </div></figure>
+        </div>
+      </article>
+
+      <article class="p" data-editor>
+        <div class="text">
+          <div class="eyebrow">Editor</div>
+          <h3>Panels stay quiet</h3>
+          <p>Panels use neutral surfaces with one accent. If a panel draws the eye away from the main content, it is too loud.</p>
+        </div>
+        <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-3)">
+          <div class="c-faint">Fill</div>
+          <div class="space-between"><span>Colour</span><span class="swatches"><i style="background:var(--accent)"></i></span></div>
+          <div class="space-between"><span>Opacity</span><span class="mono">80</span></div>
+        </div></div></figure>
+      </article>
+
+      <article class="p" data-editor>
+        <div class="text">
+          <div class="eyebrow">Editor</div>
+          <h3>Corners follow the role</h3>
+          <p>One radius for floating panels, a smaller one for cards inside them, pills for controls. The card’s radius is the panel’s radius minus the padding, so the corners stay concentric. No card inside a card.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body" style="padding:0;background:none">
+            <div class="float" style="border-radius:var(--r-float);padding:var(--sp-3);display:grid;gap:var(--sp-3)">
+              <div style="background:var(--s2);border-radius:calc(var(--r-float) - var(--sp-3));padding:var(--sp-3);font-size:14px">Card</div>
+              <div class="btns"><button class="btn">Pill control</button></div>
+            </div>
+          </div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body" style="padding:0;background:none">
+            <div class="float" style="border-radius:var(--r-float);padding:var(--sp-3)">
+              <div style="background:var(--s2);border-radius:var(--r-card);padding:var(--sp-3)"><div style="background:var(--s3);border-radius:var(--r-card);padding:var(--sp-3);font-size:14px">Card in a card</div></div>
+            </div>
+          </div></figure>
+        </div>
+      </article>
+    </section>
+
+    <!-- TYPE -->
+    <section id="type">
+      <h2>Type, words and icons</h2>
+
+      <article class="p">
+        <div class="text">
+          <h3>Two typefaces, each with a job</h3>
+          <p>A sans for everything you read. A mono only for codes and values you compare. Timers, prices and tables use tabular figures so they don’t shift.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp"><div style="font-size:20px;font-weight:500">Order shipped</div><div class="c-muted" style="font-size:14px">Tracking <span class="mono">1Z 84A 7F2</span></div></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp"><div style="font-family:Georgia,serif;font-style:italic;font-size:22px">Order shipped</div><div style="font-family:var(--font-mono);font-size:13px" class="c-muted">Your order is on its way</div></div></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Hierarchy from size and colour, not weight</h3>
+          <p>Reach for a bigger size or a stronger text role before a heavier weight. No italic emphasis, no negative letter spacing on small text, sentence case everywhere.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-1)"><div style="font-size:20px;font-weight:500">Billing</div><div class="c-muted" style="font-size:14px">Invoices from the last year</div><div class="c-faint">12 invoices</div></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-1)"><div style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase">Billing</div><div style="font-size:14px;font-weight:700">Invoices from the <em>last</em> year</div><div style="font-size:12px;font-weight:700;letter-spacing:-.04em">12 invoices</div></div></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Type is tuned per size</h3>
+          <p>Leading tightens as text grows and loosens for body copy; large text takes slight negative tracking, small text a little positive. Set spacing in <code>rem</code> so the layout grows with the reader’s text size. Body text runs 60–75 characters per line, and headings balance their line breaks.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body type-demo">
+            <h4>Quarterly report and outlook</h4>
+            <p>Revenue grew in every region, with the largest gain in the second quarter.</p>
+          </div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body type-demo bad">
+            <h4>Quarterly report and outlook</h4>
+            <p>Revenue grew in every region, with the largest gain in the second quarter.</p>
+          </div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Labels name things; they don’t give instructions</h3>
+          <p>“Colours” is enough. Drop helper lines and readouts nobody acts on. No trailing periods or exclamation marks. Placeholders are short. A toggle says what happens when it’s on, and a link says where it goes.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="field"><label for="f1">Colours</label><div class="swatches"><i style="background:var(--accent)"></i><i style="background:var(--text)"></i><i style="background:var(--text-faint)"></i></div></div><div class="field" style="margin-top:var(--sp-3)"><input id="f1" class="input" placeholder="Search" aria-label="Search"></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="field"><label style="font-size:14px;color:var(--text)">Pick a colour below!</label><div class="swatches"><i style="background:var(--accent)"></i><i style="background:var(--text)"></i><i style="background:var(--text-faint)"></i></div><div class="c-faint">Selected: blue</div></div><div class="field" style="margin-top:var(--sp-3)"><input class="input" placeholder="Type here to search for something..." aria-label="Search"></div></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Buttons say what happens</h3>
+          <p>Verb plus object. No “Get started” or “Learn more”, no marketing words like seamless, supercharge, elevate or unlock, and no made-up numbers. A confirmation repeats the action, like “Delete project” beside “Cancel”, and a flow uses one label for every next step.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="btns" style="flex-direction:column;align-items:flex-start"><button class="btn">Save draft</button><button class="btn">Send invite</button><button class="btn">Download report</button></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="btns" style="flex-direction:column;align-items:flex-start"><button class="btn">Get started</button><button class="btn">Learn more</button><button class="btn">Unlock the magic!</button></div></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Talk to the reader</h3>
+          <p>Address people as “you”, never “the user”.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><p style="font-size:14px">You have 3 drafts</p></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><p style="font-size:14px">The user has 3 drafts</p></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Punctuation is typographic</h3>
+          <p>Curly quotes, an en dash for ranges, an em dash for asides, and the ellipsis character instead of three dots. Write in normal case and let styling change it.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp" style="font-size:14px"><span>“Q4 plan” is ready</span><span>2–4 weeks</span><span>Saving…</span></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp" style="font-size:14px"><span>"Q4 plan" is ready</span><span>2-4 weeks</span><span>Saving...</span></div></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Cut text stays reachable</h3>
+          <p>When text is cut with an ellipsis, the full text is in a tooltip or an expanded view. Long words, links and IDs wrap inside their container.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do: hover or focus it</figcaption><div class="ex-body"><span class="tipwrap" tabindex="0"><span class="ell">Quarterly planning final approved.pdf</span><span class="tip" role="tooltip">Quarterly planning final approved.pdf</span></span></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><span class="ell">Quarterly planning final approved.pdf</span></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>One icon set, used where it helps</h3>
+          <p>One set, one size scale, the colour and stroke weight of the text beside it, in a fixed-width box. An icon-only button always has a tooltip and an accessible name.</p>
+        </div>
+        <figure class="ex"><figcaption>Do</figcaption><div class="ex-body">
+          <div class="rows">
+            <div class="row"><svg class="ico"><use href="#i-plus"/></svg><span>Add</span><span></span></div>
+            <div class="row"><svg class="ico"><use href="#i-search"/></svg><span>Search</span><span></span></div>
+            <div class="row"><svg class="ico"><use href="#i-trash"/></svg><span>Delete</span><span></span></div>
+          </div>
+          <div style="margin-top:var(--sp-5)"><span class="tipwrap"><button class="btn icon" aria-label="Download"><svg class="ico"><use href="#i-download"/></svg></button><span class="tip" role="tooltip">Download</span></span></div>
+          <p class="note">Hover or focus the icon button to see its tooltip.</p>
+        </div></figure>
+      </article>
+
+      <article class="p" data-editor>
+        <div class="text">
+          <div class="eyebrow">Editor</div>
+          <h3>Live values are mono and tabular</h3>
+          <p>Counts and values you compare use the mono typeface. Numbers that change while you watch use tabular figures, in one format across a panel, so they don’t jiggle.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp">
+            <div class="space-between"><span>Width</span><span class="mono" style="font-variant-numeric:tabular-nums">128.00</span></div>
+            <div class="space-between"><span>Height</span><span class="mono" style="font-variant-numeric:tabular-nums">64.50</span></div>
+            <div class="space-between"><span>Radius</span><span class="mono" style="font-variant-numeric:tabular-nums">0.25</span></div>
+          </div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp">
+            <div class="space-between"><span>Width</span><span>128</span></div>
+            <div class="space-between"><span>Height</span><span>64.5</span></div>
+            <div class="space-between"><span>Radius</span><span>.25</span></div>
+          </div></div></figure>
+        </div>
+      </article>
+
+      <article class="p" data-editor>
+        <div class="text">
+          <div class="eyebrow">Editor</div>
+          <h3>Readouts earn their place</h3>
+          <p>A value shown in a panel is one someone acts on. “Opacity” next to a slider is enough.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-4)"><div class="space-between"><span>Opacity</span><span class="mono">80</span></div><div class="slider"></div></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-3)"><div class="space-between"><span>Current opacity value:</span><span class="mono">80%</span></div><div class="slider"></div><div class="c-faint">Drag to change</div></div></div></figure>
+        </div>
+      </article>
+
+      <article class="p" data-editor>
+        <div class="text">
+          <div class="eyebrow">Editor</div>
+          <h3>Panel words are short</h3>
+          <p>Labels name things, buttons are verb plus object, and placeholders are a word or two.</p>
+        </div>
+        <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-3)">
+          <div class="c-faint">Layers</div>
+          <input class="input" placeholder="Search layers" aria-label="Search layers">
+          <div class="btns"><button class="btn">Add layer</button><button class="btn">Export PNG</button></div>
+        </div></div></figure>
+      </article>
+    </section>
+
+    <!-- INTERACTION -->
+    <section id="interaction">
+      <h2>Interaction and states</h2>
+
+      <article class="p">
+        <div class="text">
+          <h3>Every control shows its state</h3>
+          <p>Resting, hover, pressed, selected, on and disabled each look different. Hover is a colour change; buttons never grow. Press shrinks slightly; selected and on use the accent.</p>
+        </div>
+        <figure class="ex"><figcaption>Do</figcaption><div class="ex-body">
+          <div class="btns">
+            <button class="btn">Resting</button>
+            <button class="btn is-hover" tabindex="-1">Hover</button>
+            <button class="btn is-pressed" tabindex="-1">Pressed</button>
+            <button class="btn is-selected" tabindex="-1">Selected</button>
+            <button class="btn" disabled>Disabled</button>
+          </div>
+          <p class="note">The first button is live. Hover it and press it.</p>
+        </div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Answer on press</h3>
+          <p>Press shows on pointer-down and commits on release; sliding away cancels. Feedback continues for as long as the gesture lasts, not only at the end.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body">
+            <div class="btns"><button class="btn primary" data-press>Send invite</button><span class="press-log" role="status">Resting</span></div>
+            <p class="note">Press and hold: it answers at once.</p>
+          </div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body">
+            <div class="btns"><button class="btn late" tabindex="-1">Send invite</button><span class="press-log">Waits</span></div>
+            <p class="note">The same feedback delayed by 180ms feels dead.</p>
+          </div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>The thing follows the finger</h3>
+          <p>A drag tracks 1:1 from where it was grabbed, not from its centre. A short threshold decides the direction, then it commits; past the end it resists and springs back. Arrow keys move it too.</p>
+        </div>
+        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body">
+          <div class="drag-track" id="drag-track">
+            <div class="drag-card" id="drag-card" tabindex="0" role="slider" aria-label="Card position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">Drag me</div>
+          </div>
+          <div class="readout"><span>Offset</span><span class="mono" id="drag-x">0 px</span></div>
+        </div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Say why something is off</h3>
+          <p>A disabled control gets a short tooltip with the reason and the way out. A form’s submit button is the exception: it stays enabled, and the form is checked when it’s sent.</p>
+        </div>
+        <figure class="ex"><figcaption>Do</figcaption><div class="ex-body">
+          <div class="tip" style="position:static">Add a title to publish</div><br>
+          <button class="btn" disabled>Publish post</button>
+        </div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Hover only where there’s a mouse</h3>
+          <p>Hover styles sit behind a media query so a tap on a phone doesn’t leave them stuck.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><pre>@media (hover: hover) {
+  .btn:hover {
+    background: var(--s3);
+  }
+}</pre></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><pre><span class="no">.btn:hover {
+  background: var(--s3);
+}</span></pre></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Undo beats a confirmation</h3>
+          <p>Give people a way back from a mistake. Confirm only what is destructive and can’t be undone.</p>
+        </div>
+        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body">
+          <div class="undo"><span id="undo-item">Draft: Q4 planning</span><button class="btn" id="undo-delete">Delete</button></div>
+          <div class="undo-msg" role="status"><span id="undo-msg"></span><button class="btn" id="undo-restore" hidden>Undo</button></div>
+        </div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Say what happened</h3>
+          <p>Status, success, warning and error each have a place. Put an error where the problem is, not only in a summary after submit. Colour is never the only signal.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body">
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" class="input" value="sam@" aria-invalid="true" aria-describedby="email-err">
+              <span class="field-err" id="email-err">Enter an email like name@company.com</span>
+            </div>
+            <p class="note">The message sits under the field and clears when it’s fixed.</p>
+          </div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body">
+            <div class="grp" style="gap:var(--sp-3)">
+              <div class="c-faint">One or more fields are invalid</div>
+              <div class="field"><label for="email2">Email</label><input id="email2" class="input" value="sam@"></div>
+              <button class="btn" disabled>Save changes</button>
+            </div>
+          </div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Every screen answers where you are</h3>
+          <p>Where am I, what can I do here, and how do I leave. Never a dead end. An empty view says what belongs there and offers one action to start.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body">
+            <div class="mini-bar">
+              <button class="btn icon" aria-label="Back"><svg class="ico"><use href="#i-back"/></svg></button>
+              <span style="font-size:14px;font-weight:500">Billing</span>
+            </div>
+            <div class="rows" style="margin-top:var(--sp-3)">
+              <div class="row sel" style="grid-template-columns:1fr"><span>Invoices</span></div>
+              <div class="row" style="grid-template-columns:1fr"><span>Payment method</span></div>
+            </div>
+          </div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body" style="height:132px;display:grid;place-items:center">
+            <button class="btn primary">Continue</button>
+          </div></figure>
+        </div>
+      </article>
+    </section>
+
+    <!-- ACCESSIBILITY -->
+    <section id="a11y">
+      <h2>Accessibility</h2>
+
+      <article class="p">
+        <div class="text">
+          <h3>Native elements first</h3>
+          <p>A button is a button and a link is a link, so keyboard, screen reader and browser behaviour come for free. Tab order follows the page.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><pre>&lt;button type="button"&gt;
+  Save draft
+&lt;/button&gt;</pre></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><pre><span class="no">&lt;div onclick="save()"
+  tabindex="3"&gt;
+  Save draft
+&lt;/div&gt;</span></pre></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Focus is always visible</h3>
+          <p>Keyboard focus shows a ring. Never remove an outline without putting something as clear in its place.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body">
+            <div class="btns" style="padding:var(--sp-1)"><button class="btn is-focus" tabindex="-1">Send invite</button></div>
+            <div style="margin-top:var(--sp-4)"><div class="stat"><span>Text</span><span>4.5:1</span></div><div class="stat"><span>Controls, large text</span><span>3:1</span></div></div>
+          </div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><pre><span class="no">button:focus {
+  outline: none;
+}</span></pre></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Hit areas are big enough</h3>
+          <p>At least 24 by 24px. Aim for 44 by 44px on touch screens and 40 by 40px with a mouse. Hit areas never overlap.</p>
+        </div>
+        <figure class="ex"><figcaption>The same 16px icon</figcaption><div class="ex-body"><div class="hits">
+          <div><span class="hit" style="--h:24px"><svg class="ico"><use href="#i-trash"/></svg></span><span class="c-faint">24px minimum</span></div>
+          <div><span class="hit" style="--h:40px"><svg class="ico"><use href="#i-trash"/></svg></span><span class="c-faint">40px mouse</span></div>
+          <div><span class="hit" style="--h:44px"><svg class="ico"><use href="#i-trash"/></svg></span><span class="c-faint">44px touch</span></div>
+        </div></div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Every input has a visible label</h3>
+          <p>The field type and keyboard match what goes in. Never block paste; people paste passwords and one-time codes.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="field"><label for="a11y-email">Email</label><input id="a11y-email" class="input" type="email" inputmode="email" autocomplete="email"></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="field"><input class="input" placeholder="Email" aria-label="Email"></div><p class="note">The label disappears as soon as you type.</p></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Name what can’t be seen</h3>
+          <p>An icon-only button has an accessible name. Alt text says what an image shows and why it’s there; a decorative image has empty alt text.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><pre>&lt;button aria-label="Download"&gt;
+&lt;img alt="Sales by region, 2026"&gt;
+&lt;img alt=""&gt; &lt;!-- decorative --&gt;</pre></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><pre><span class="no">&lt;button&gt;&lt;svg/&gt;&lt;/button&gt;
+&lt;img alt="image"&gt;</span></pre></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Errors are found on submit</h3>
+          <p>Keep the submit button enabled. Check the form when it’s sent, mark each invalid field, tie each error to its field, and move focus to the first one.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><button class="btn primary">Save changes</button><p class="note">Errors appear next to their fields after you press it.</p></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><button class="btn" disabled>Save changes</button><p class="note">Nothing says what’s missing.</p></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Announce at the right volume</h3>
+          <p>Routine updates are announced politely. Only urgent errors interrupt.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><pre>&lt;p role="status"&gt;Draft saved&lt;/p&gt;
+&lt;p role="alert"&gt;Payment failed&lt;/p&gt;</pre></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><pre><span class="no">&lt;p role="alert"&gt;Draft saved&lt;/p&gt;</span></pre></div></figure>
+        </div>
+      </article>
+    </section>
+
+    <!-- SLOP -->
+    <section id="slop">
+      <h2>Slop to avoid</h2>
+      <p class="lede">Things that make an interface look generated. Leave them out and do the plain thing instead.</p>
+      <div class="slop">
+        <div><h3>Tags and badges</h3><p>No “New” or “Beta” pills. Say it in words where it matters, or not at all.</p></div>
+        <div><h3>Italic words</h3><p>No italics for emphasis or flavour. A logo can be the exception.</p></div>
+        <div><h3>Editorial serifs and negative kerning</h3><p>No serif display type, and no tightened spacing to make headings look designed.</p></div>
+        <div><h3>Over-detailed UI</h3><p>Every extra line, tick, label and tiny icon has to earn its place. When in doubt, take it out.</p></div>
+        <div><h3>Dividers</h3><p>Separate groups with space, not lines.</p></div>
+        <div><h3>Many shades and opacities</h3><p>Use the ramp steps and the three text roles. No new tints of a colour. An image’s hairline edge is the one exception.</p></div>
+        <div><h3>Containers with borders</h3><p>Space and a surface step do the grouping. A floating layer’s outer edge and an image’s hairline edge can be the exception.</p></div>
+        <div><h3>Diagrams</h3><p>Only when one is really needed, and as simple as it can be.</p></div>
+        <div><h3>Code breadcrumbs</h3><p>No file paths, token names or trails in the interface. Say it in words.</p></div>
+        <div><h3>Section numbering</h3><p>No “01” or “1.” in front of section titles.</p></div>
+      </div>
+    </section>
+
+    <!-- MOTION -->
+    <section id="motion">
+      <h2>Motion</h2>
+      <p class="lede">Content is allowed to move as much as it likes. The interface around it moves only to explain a change.</p>
+
+      <div class="toolbar">
+        <div class="tog"><button class="sw" role="switch" aria-checked="false" aria-labelledby="l-slow" data-flag="slow"></button><span id="l-slow">Slow 5×</span></div>
+        <div class="tog"><button class="sw" role="switch" aria-checked="false" aria-labelledby="l-reduced" data-flag="reduced"></button><span id="l-reduced">Reduced motion</span></div>
+      </div>
+
+      <div class="stage" id="stage">
+        <div class="stage-main mv">
+          <div class="btns">
+            <button class="btn" data-target="menu" aria-expanded="false">Menu</button>
+            <button class="btn" data-target="drawer" aria-expanded="false">Drawer</button>
+            <button class="btn" data-target="dialog" aria-expanded="false">Dialog</button>
+          </div>
+          <div class="grp" style="margin-top:var(--sp-4)"><div class="bar w60"></div><div class="bar w90"></div><div class="bar w40"></div><div class="bar w90"></div></div>
+        </div>
+        <div class="pop float mv" id="menu"><div class="item">Rename</div><div class="item">Duplicate</div><div class="item">Archive</div></div>
+        <aside class="drawer mv" id="drawer"><h4>Details</h4><div class="c-muted" style="font-size:14px">Slides from the edge it’s attached to. The page steps aside with it.</div><button class="btn" data-target="drawer">Close</button></aside>
+        <div class="dialog-wrap"><div class="dialog mv" id="dialog" role="dialog" aria-label="Delete project"><h4>Delete project</h4><div class="c-muted" style="font-size:14px">This can’t be undone.</div><div class="btns"><button class="btn primary" data-target="dialog">Delete project</button><button class="btn" data-target="dialog">Cancel</button></div></div></div>
+      </div>
+      <p class="note">The menu grows from its button, the drawer from its edge, the dialog from its centre. Click again while one is moving: it reverses from where it is. Each one leaves in 150ms and arrives in 250ms.</p>
+
+      <article class="p">
+        <div class="text">
+          <h3>Animate by how often it happens</h3>
+          <p>The more often someone does a thing, the less it should move.</p>
+        </div>
+        <div class="freq">
+          <div class="fr"><b>All the time</b><span class="ex-t">Typing, picking from a list, arrow keys, shortcuts</span><span class="mo">None, or colour only</span><span class="meter"><i style="width:6%"></i></span></div>
+          <div class="fr"><b>Often</b><span class="ex-t">Hover, press, toggles, switching tabs</span><span class="mo">Colour plus a 0.97 press, 150ms</span><span class="meter"><i style="width:30%"></i></span></div>
+          <div class="fr"><b>Sometimes</b><span class="ex-t">Drawers, menus, popovers, dialogs</span><span class="mo">Standard enter and exit</span><span class="meter"><i style="width:62%"></i></span></div>
+          <div class="fr"><b>Rarely</b><span class="ex-t">Loading screen, first launch, empty states, a finished upload</span><span class="mo">Room for character</span><span class="meter"><i style="width:100%"></i></span></div>
+          <p class="note">A menu people open many times a day opens instantly and only animates its close.</p>
+        </div>
+      </article>
+
+      <article class="p" data-editor>
+        <div class="text">
+          <div class="eyebrow">Editor</div>
+          <h3>Constant actions don’t move</h3>
+          <p>Dragging a slider, scrubbing a value, undo and redo, picking a layer, and nudging with arrow keys get no motion, or a colour change only. A selected item is a surface step.</p>
+        </div>
+        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body"><div class="rows pick" id="pick">
+          <button class="row" data-pick><svg class="ico"><use href="#i-file"/></svg><span>Background</span><span class="n">100</span></button>
+          <button class="row sel" data-pick><svg class="ico"><use href="#i-file"/></svg><span>Headline</span><span class="n">80</span></button>
+          <button class="row" data-pick><svg class="ico"><use href="#i-file"/></svg><span>Photo</span><span class="n">100</span></button>
+        </div></div></figure>
+      </article>
+
+      <article class="p" data-editor>
+        <div class="text">
+          <div class="eyebrow">Editor</div>
+          <h3>Panels open as trays</h3>
+          <p>A tray slides out from the edge it’s attached to on the drawer curve, 250ms in and 150ms out. Whatever sits beside it steps aside with the same timing and direction.</p>
+        </div>
+        <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">The drawer in the playground above is the pattern. Open it and watch the page move with it.</p></div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Nothing appears out of nowhere</h3>
+          <p>New UI comes from the thing that opened it. A drawer slides from its edge, a menu grows from its button, a dialog with no trigger scales from its centre.</p>
+        </div>
+        <figure class="ex"><figcaption>See the playground above</figcaption><div class="ex-body"><pre>.menu {
+  transform-origin: top left;
+}</pre></div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Leave the way you came</h3>
+          <p>Exit along the path it entered, with the easing mirrored, so the way out matches the way in.</p>
+        </div>
+        <figure class="ex" data-paths><figcaption>Do, then avoid</figcaption><div class="ex-body">
+          <div class="paths">
+            <div>
+              <div class="lane"><div class="path-panel" data-path-panel="x"></div></div>
+              <div class="lane-cap">In from the right, out to the right</div>
+            </div>
+            <div>
+              <div class="lane"><div class="path-panel" data-path-panel="y"></div></div>
+              <div class="lane-cap">In from the right, out the bottom</div>
+            </div>
+          </div>
+          <button class="btn replay" data-paths-btn>Replay</button>
+        </div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Motion never blocks input</h3>
+          <p>You can click, type or drag the moment something starts opening. Use CSS transitions for anything that opens and closes, because a transition can reverse halfway and a keyframe restarts from zero.</p>
+        </div>
+        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">Turn on Slow 5×, open the drawer, and click Close before it finishes. It turns around from where it is.</p></div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Start from where it is</h3>
+          <p>An interrupted animation picks up from its current on-screen value and speed. Chrome that opens and closes uses a transition, which can reverse halfway; anything a finger drags or throws uses a spring, which takes a new target and keeps moving.</p>
+        </div>
+        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body">
+          <div class="spring-row">
+            <div>
+              <div class="spring-label"><span>No overshoot</span><span class="mono">1.0</span></div>
+              <div class="spring-lane"><div class="spring-box" id="spring-a"></div></div>
+            </div>
+            <div>
+              <div class="spring-label"><span>After a flick</span><span class="mono">0.8</span></div>
+              <div class="spring-lane"><div class="spring-box bounce" id="spring-b"></div></div>
+            </div>
+          </div>
+          <button class="btn replay" id="spring-run">Send across</button>
+          <p class="note">Press again while they move: both take the new target from where they are.</p>
+        </div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Carry the throw</h3>
+          <p>When a drag ends, hand its speed to the animation and send it where the throw was going, not to the nearest edge from where the finger left.</p>
+        </div>
+        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body">
+          <div class="flick-track" id="flick-track">
+            <div class="flick-card" id="flick-card" tabindex="0" role="slider" aria-label="Card position" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1">Flick me</div>
+          </div>
+          <div class="readout"><span>Slot</span><span class="mono" id="flick-slot">1 of 3</span></div>
+          <p class="note">Let go near a slot and it settles there. Flick and it carries to the slot the throw was heading for.</p>
+        </div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Edges give</h3>
+          <p>At a boundary, resist more the further it’s pushed, then spring back on release. A hard stop reads as frozen.</p>
+        </div>
+        <figure class="ex"><figcaption>See the drag above</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">Drag the card past either end: it keeps giving, less with every pixel, and returns on release. Nothing locks.</p></div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Leave faster than you arrive</h3>
+          <p>Exits are about half the enter time. A drawer that opens in 250ms closes in 150ms. Exits are smaller too: a shorter move, a fade and a 4px blur.</p>
+        </div>
+        <figure class="ex" data-replay><figcaption>Do</figcaption><div class="ex-body">
+          <div class="tb-wrap"><div class="tb-label"><span>Enter</span><span class="mono">250ms</span></div><div class="timebar rp" style="transition:transform var(--t-normal) var(--ease-out)"></div></div>
+          <div class="tb-wrap"><div class="tb-label"><span>Exit</span><span class="mono">150ms</span></div><div class="timebar rp" style="transition:transform var(--t-fast) var(--ease-out)"></div></div>
+          <button class="btn replay" data-replay-btn>Replay</button>
+        </div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Exits blur a little</h3>
+          <p>On the way out, a card moves 4px, fades and blurs by 4px. On the way in it only fades and moves.</p>
+        </div>
+        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body">
+          <div class="xcard open" id="xcard">Draft saved</div>
+          <button class="btn" id="xcard-btn" aria-pressed="false">Hide card</button>
+        </div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Ease out, never in</h3>
+          <p>Enter and exit use ease-out. Something travelling across the screen uses ease-in-out. Drawers use the drawer curve. An ease-in curve holds back right when the person is waiting.</p>
+        </div>
+        <figure class="ex" data-replay><figcaption>Do</figcaption><div class="ex-body">
+          <div class="curves">
+            <div><svg viewBox="0 0 100 100"><path d="M10,90 C28.4,10 35.6,10 90,10"/></svg><span>Ease out</span></div>
+            <div><svg viewBox="0 0 100 100"><path d="M10,90 C71.6,90 24,10 90,10"/></svg><span>Ease in-out</span></div>
+            <div><svg viewBox="0 0 100 100"><path d="M10,90 C35.6,32.4 10,10 90,10"/></svg><span>Ease drawer</span></div>
+            <div class="avoid"><svg viewBox="0 0 100 100"><path d="M10,90 C43.6,90 90,10 90,10"/></svg><span>Ease in (avoid)</span></div>
+          </div>
+          <div class="track"><div class="rail"></div><div class="dot rp e-out"></div><span class="lbl">Ease out</span></div>
+          <div class="track"><div class="rail"></div><div class="dot rp e-io"></div><span class="lbl">Ease in-out</span></div>
+          <div class="track"><div class="rail"></div><div class="dot rp e-dr"></div><span class="lbl">Ease drawer</span></div>
+          <div class="track"><div class="rail"></div><div class="dot rp e-in"></div><span class="lbl">Ease in (avoid)</span></div>
+          <button class="btn replay" data-replay-btn>Replay</button>
+        </div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Start close to the end</h3>
+          <p>Enter from <code>scale(0.95)</code> with opacity 0, or a 4px to 8px nudge. Never from <code>scale(0)</code>.</p>
+        </div>
+        <figure class="ex" data-replay><figcaption>Do, then avoid</figcaption><div class="ex-body">
+          <div class="enter"><div><div class="sq good rp"></div><div class="c-faint" style="margin-top:var(--sp-2)">From 0.95</div></div><div><div class="sq bad rp"></div><div class="c-faint" style="margin-top:var(--sp-2)">From 0</div></div></div>
+          <button class="btn replay" data-replay-btn>Replay</button>
+        </div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>One change, one movement</h3>
+          <p>When one thing opens and another steps aside, they share timing and direction so it reads as one event.</p>
+        </div>
+        <figure class="ex"><figcaption>See the drawer</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">In the playground, the page shifts 12px with the drawer on the same curve and duration.</p></div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Only move what’s cheap</h3>
+          <p>Animate transform, opacity and colours, plus a blur of 4px or less on exits and icon swaps. List the properties; never <code>transition: all</code>. Height animations stay short because they cost layout on every frame.</p>
+        </div>
+        <div class="pair">
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><pre>transition:
+  transform var(--dur-normal)
+    var(--ease-out),
+  opacity var(--dur-normal)
+    var(--ease-out);</pre></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><pre><span class="no">transition: all 0.3s;</span></pre></div></figure>
+        </div>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Icons swap in place</h3>
+          <p>The old icon fades out as the new one fades in. The new one scales from 0.25 to 1 and goes from a 4px blur to sharp; the old one does the reverse.</p>
+        </div>
+        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body">
+          <button class="btn ibtn" id="copy-btn"><span class="swap"><svg class="ico" id="copy-a"><use href="#i-copy"/></svg><svg class="ico out" id="copy-b"><use href="#i-check"/></svg></span><span id="copy-label">Copy link</span></button>
+        </div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Enter in small groups</h3>
+          <p>A list arrives in a few groups with a short stagger between them, not item by item and not as one block.</p>
+        </div>
+        <figure class="ex" data-replay><figcaption>Three groups, 50ms apart</figcaption><div class="ex-body">
+          <div class="stag">
+            <div class="rp w90" style="--g:0"></div><div class="rp w60" style="--g:0"></div><div class="rp w90" style="--g:0"></div>
+            <div class="rp w40" style="--g:1"></div><div class="rp w90" style="--g:1"></div><div class="rp w60" style="--g:1"></div>
+            <div class="rp w90" style="--g:2"></div><div class="rp w60" style="--g:2"></div><div class="rp w40" style="--g:2"></div>
+          </div>
+          <button class="btn replay" data-replay-btn>Replay</button>
+        </div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Nothing moves on arrival</h3>
+          <p>Nothing animates on page load unless that moment was designed. Switching between light and dark mode turns transitions off, so every colour changes in the same frame. This page does both.</p>
+        </div>
+        <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><pre>matchMedia('(prefers-color-scheme: dark)')
+  .addEventListener('change', () =&gt; {
+    root.classList.add('theme-switching');
+    // removed two frames later
+  });</pre></div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Sound and haptics land on the same frame</h3>
+          <p>Fire them on the cause, on the same frame as the visual, and keep them for commit, success and error. Anything more trains people to ignore them.</p>
+        </div>
+        <figure class="ex"><figcaption>If you use them</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">A toggle clicks on the frame it flips. A failed save buzzes on the frame the error appears. A scroll gesture stays silent.</p></div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Bounce follows momentum, and nothing loops for attention</h3>
+          <p>A release that carried speed can overshoot. A loader can too. A control that simply appeared doesn’t. A loader is the only thing that loops, and only while you’re waiting.</p>
+        </div>
+        <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">Pulsing dots, shimmer, breathing glows, marquees, tickers and parallax.</p></div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Reduced motion gets the same end state</h3>
+          <p>With reduced motion on, things fade instead of move, and nothing depends on seeing the animation to make sense. Reduced transparency makes floating surfaces solid; more contrast gives edges a defined boundary. Neither loses information.</p>
+        </div>
+        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">Switch on Reduced motion above, then open the drawer. It fades in at its final position.</p></div></figure>
+      </article>
+
+      <article class="p">
+        <div class="text">
+          <h3>Watch it before you ship it</h3>
+          <p>Build the interaction before you judge it, because motion and visuals are designed together, not in layers. Play it at normal speed, then slowed down 5x, and look at the frames in between. Look again the next day.</p>
+        </div>
+        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">Slow 5× above stretches every duration on this page.</p></div></figure>
+      </article>
+    </section>
+
+    <!-- VALUES -->
+    <section id="values">
+      <h2>Motion values</h2>
+      <p class="lede">Durations and curves follow Emil Kowalski’s; the springs come from Apple’s fluid interfaces work. Keep them as tokens and use the token name in code, not the number.</p>
+
+      <div class="durs">
+        <figure class="ex" data-replay><figcaption>Durations</figcaption><div class="ex-body">
+          <div class="tb-wrap"><div class="tb-label"><span>Fast</span><span class="mono">150ms</span></div><div class="timebar rp" style="transition:transform var(--t-fast) var(--ease-out)"></div></div>
+          <div class="tb-wrap"><div class="tb-label"><span>Normal</span><span class="mono">250ms</span></div><div class="timebar rp" style="transition:transform var(--t-normal) var(--ease-out)"></div></div>
+          <div class="tb-wrap"><div class="tb-label"><span>Slow</span><span class="mono">500ms</span></div><div class="timebar rp" style="transition:transform var(--t-slow) var(--ease-out)"></div></div>
+          <div class="btns replay"><button class="btn" data-replay-btn>Replay</button><button class="btn primary">Press me</button></div>
+        </div></figure>
+      </div>
+
+      <div class="tokens">
+        <div class="tr"><span>Duration fast</span><span>150ms</span><span>Hover, press, colour changes, exits, small menus</span></div>
+        <div class="tr"><span>Duration normal</span><span>250ms</span><span>Drawers, menus, dialogs entering</span></div>
+        <div class="tr"><span>Duration slow</span><span>500ms</span><span>Rare moments only, like a loader</span></div>
+        <div class="tr"><span>Stagger</span><span>50ms</span><span>Gap between items entering in sequence</span></div>
+        <div class="tr"><span>Ease out</span><span>cubic-bezier(0.23, 1, 0.32, 1)</span><span>Anything entering or leaving, hover, colour</span></div>
+        <div class="tr"><span>Ease in-out</span><span>cubic-bezier(0.77, 0, 0.175, 1)</span><span>Something travelling across the screen</span></div>
+        <div class="tr"><span>Ease drawer</span><span>cubic-bezier(0.32, 0.72, 0, 1)</span><span>Drawers and sheets sliding out</span></div>
+        <div class="tr"><span>Press scale</span><span>0.97</span><span>Every pressable button</span></div>
+        <div class="tr"><span>Exit blur</span><span>4px</span><span>The most blur an exit or icon swap uses</span></div>
+        <div class="tr"><span>Icon swap scale</span><span>0.25</span><span>Where an incoming icon starts</span></div>
+        <div class="tr"><span>Spring default</span><span>damping 1.0, response 0.35</span><span>Anything dragged, thrown or opened by a gesture</span></div>
+        <div class="tr"><span>Spring after a flick</span><span>damping 0.8, response 0.35</span><span>A release that carried speed. Bounce only here</span></div>
+        <div class="tr"><span>Momentum</span><span>deceleration 0.998</span><span>Where a flick would land, before choosing the target</span></div>
+      </div>
+    </section>
+
+    <!-- CHECKLIST -->
+    <section id="checklist">
+      <h2>Before shipping a UI change</h2>
+      <div class="progress"><span><span class="mono" id="done">0</span> of <span class="mono" id="total">0</span> checked</span><button class="btn" id="clear">Clear checks</button></div>
+      <ul class="checks" id="checks">
+        <li><label><input type="checkbox"><span class="box"></span>Every value comes from a token</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Nothing scrolls sideways</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>A control sits with what it changes</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Press feedback lands on pointer-down, not on release</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>A drag tracks the pointer 1:1 and can be caught mid-motion</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>A flick lands where its speed was heading</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>An exit leaves by the path it arrived</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Undo covers a mistake before a dialog does</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Errors appear next to the field, not only after submit</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Large text has tighter leading and tracking than body copy</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>No label is an instruction the control already makes obvious</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Anything new that appears comes from where it was opened</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>You can click or type while it animates</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Exit is faster than enter</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Only transform, opacity, colours and a 4px blur animate</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Nothing animates on page load, and switching theme has no transitions</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Reduced motion reaches the same end state</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Reduced transparency and more contrast have an answer</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Hover is behind <code>(hover: hover)</code></label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Nothing from the slop list</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Only floating things have a shadow</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Equal things share one size and line up</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Buttons read as verb plus object, with no marketing words or emoji</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Keyboard focus is visible everywhere it can land</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Watched at normal speed and slowed down</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Nested corners are concentric</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Images have the hairline edge</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>The accent is the brand colour, and tokens are named for their job</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Hit areas are at least 24px, 44px on touch</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Every input has a visible label, and paste works</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Colour is never the only signal</label></li>
+        <li><label><input type="checkbox"><span class="box"></span>Toggles say what happens when they’re on</label></li>
+        <li class="group" data-editor>Editor and workspace</li>
+        <li data-editor><label><input type="checkbox"><span class="box"></span>Nothing in a panel scrolls sideways</label></li>
+        <li data-editor><label><input type="checkbox"><span class="box"></span>Settings and menus open beside, not instead</label></li>
+        <li data-editor><label><input type="checkbox"><span class="box"></span>Controls that change the same thing sit in one section</label></li>
+        <li data-editor><label><input type="checkbox"><span class="box"></span>Panels are neutral with one accent</label></li>
+        <li data-editor><label><input type="checkbox"><span class="box"></span>No card inside a card</label></li>
+        <li data-editor><label><input type="checkbox"><span class="box"></span>Live numbers are mono, tabular and in one format</label></li>
+        <li data-editor><label><input type="checkbox"><span class="box"></span>Dragging, scrubbing, undo and redo have no motion</label></li>
+        <li data-editor><label><input type="checkbox"><span class="box"></span>A tray can be grabbed mid-motion and keeps its speed</label></li>
+      </ul>
+    </section>
+
+    <section id="build">
+      <h2>Build notes for the web</h2>
+      <p class="lede">How to meet the rules above in HTML and CSS.</p>
+      <div class="slop">
+        <div><h3>Type</h3><p>Ship <code>.woff2</code>. Font smoothing on the root. <code>tabular-nums</code> for changing numbers. <code>text-wrap: balance</code> on headings, <code>pretty</code> on descriptions. <code>overflow-wrap: break-word</code> for long words. <code>text-underline-position: from-font</code>.</p></div>
+        <div><h3>Colour</h3><p>One way to switch themes: <code>prefers-color-scheme</code> or a <code>.dark</code> class, never both. <code>in oklab</code> keeps a gradient’s brightness even.</p></div>
+        <div><h3>Images</h3><p><code>outline: 1px solid rgb(0 0 0 / 0.08); outline-offset: -1px</code>, with white in dark mode.</p></div>
+        <div><h3>Motion</h3><p>Animations inside <code>prefers-reduced-motion: no-preference</code>. <code>will-change: transform</code> if something jitters by 1–2px, mostly in Safari on iOS. <code>transform-origin</code> from the trigger.</p></div>
+        <div><h3>Accessibility</h3><p>Style <code>:focus-visible</code>. Only <code>tabindex</code> 0 and -1. No <code>aria-hidden</code> on focusable things. <code>aria-invalid</code> and <code>aria-describedby</code> on errors. <code>pointer-events: none</code> on decorative layers.</p></div>
+        <div><h3>Layout</h3><p><code>scroll-margin-top</code> on headings so a link doesn’t land under a sticky header.</p></div>
+      </div>
+    </section>
+
+    <section class="sources">
+      <h2>Sources</h2>
+      <ul>
+        <li><a href="https://github.com/raphaelsalaja/pond/blob/main/apps/desktop/src/renderer/src/PRINCIPLES.md">Pond design principles</a> by Raphael Salaja: trays, motion never gates input, reduced motion reaches the same state.</li>
+        <li><a href="https://github.com/emilkowalski/skills">emilkowalski/skills</a> and <a href="https://emilkowal.ski/ui/great-animations">Great animations</a> by Emil Kowalski: the frequency table, easing, press scale, origin, transitions over keyframes.</li>
+        <li><a href="https://github.com/emilkowalski/skills/blob/main/skills/apple-design/SKILL.md">apple-design</a>, distilled from Apple’s WWDC design talks: the eight principles, feedback on press, 1:1 tracking, springs, velocity handoff, momentum projection, rubber-banding, mirrored exits, type tuned per size, reduced transparency and contrast. Apple’s translucent materials were left out because they contradict the no-glass rule.</li>
+        <li><a href="https://github.com/cesaroeduardo/antiwebslop">antiwebslop</a> by Eduardo de Cesaro: shadows only for floating things, one accent with one job, verb-plus-object buttons, visible focus.</li>
+        <li><a href="https://interfaces.dev/cheat-sheet">Interface cheat sheet</a>, no author listed: concentric corners, optical alignment, image edges, token naming, accent as the brand, dark palettes, blurred exits, icon swaps, typographic punctuation, hit areas, labels and errors, and the build notes.</li>
+        <li><a href="https://github.com/heydamir/unslop">unslop</a> by Damir Sokolovsky, CC BY 4.0: same thing same size, three text roles, depth from surface steps.</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<noscript><style>.rp { opacity: 1 !important; transform: none !important; }</style></noscript>
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+// Layer switch
+const layerBtns = $$('[data-layer-btn]');
+layerBtns.forEach(b => b.addEventListener('click', () => {
+  document.body.dataset.layer = b.dataset.layerBtn;
+  layerBtns.forEach(x => x.setAttribute('aria-checked', String(x === b)));
+  updateProgress();
+}));
+
+// Switches
+$$('[role="switch"]').forEach(s => s.addEventListener('click', () => {
+  const on = s.getAttribute('aria-checked') !== 'true';
+  s.setAttribute('aria-checked', String(on));
+  if (s.dataset.flag) document.body.toggleAttribute('data-' + s.dataset.flag, on);
+}));
+
+// Playground
+const stage = $('#stage');
+const layers = ['menu', 'drawer', 'dialog'].map(id => $('#' + id));
+function toggle(id) {
+  const el = $('#' + id);
+  const open = !el.classList.contains('open');
+  layers.forEach(l => {
+    if (l !== el) closeLayer(l);
+  });
+  el.classList.toggle('open', open);
+  if (id === 'drawer') stage.classList.toggle('drawer-open', open);
+  $$('[data-target="' + id + '"][aria-expanded]').forEach(b => b.setAttribute('aria-expanded', String(open)));
+}
+function closeLayer(l) {
+  l.classList.remove('open');
+  if (l.id === 'drawer') stage.classList.remove('drawer-open');
+  $$('[data-target="' + l.id + '"][aria-expanded]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+}
+$$('[data-target]').forEach(b => b.addEventListener('click', () => toggle(b.dataset.target)));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') layers.forEach(closeLayer); });
+
+// Selectable rows (editor motion specimen)
+$$('[data-pick]').forEach(r => r.addEventListener('click', () => {
+  $$('[data-pick]').forEach(x => x.classList.toggle('sel', x === r));
+}));
+
+// Replays
+function replay(root) {
+  const targets = $$('.rp', root);
+  targets.forEach(t => { t.classList.add('reset'); t.classList.remove('go'); });
+  $$('.dot', root).forEach(d => d.style.setProperty('--dist', (d.parentElement.clientWidth - d.offsetWidth) + 'px'));
+  void root.offsetWidth;
+  targets.forEach(t => t.classList.remove('reset'));
+  void root.offsetWidth;
+  targets.forEach(t => t.classList.add('go'));
+}
+$$('[data-replay]').forEach(root => {
+  $('[data-replay-btn]', root).addEventListener('click', () => replay(root));
+  new IntersectionObserver((entries, obs) => {
+    if (entries[0].isIntersecting) { replay(root); obs.disconnect(); }
+  }, { threshold: 0.6 }).observe(root);
+});
+
+// Apple specimens
+const reduceMotion = () => document.body.hasAttribute('data-reduced') || matchMedia('(prefers-reduced-motion: reduce)').matches;
+const timeScale = () => document.body.hasAttribute('data-slow') ? 5 : 1;
+const project = v => (v / 1000) * 0.998 / (1 - 0.998);
+const rubber = (over, size) => (over * size * 0.55) / (size + 0.55 * Math.abs(over));
+
+function spring({ from, to, velocity = 0, damping = 1, response = 0.35, onFrame }) {
+  if (reduceMotion()) { onFrame(to); return () => {}; }
+  const w = (2 * Math.PI) / response;
+  const k = w * w, c = 2 * damping * w;
+  let x = from, v = velocity, last = performance.now(), raf = 0, cancelled = false;
+  function frame(now) {
+    if (cancelled) return;
+    const dt = Math.min((now - last) / 1000 / timeScale(), 0.064);
+    last = now;
+    v += (-k * (x - to) - c * v) * dt;
+    x += v * dt;
+    if (Math.abs(x - to) < 0.4 && Math.abs(v) < 4) { onFrame(to); return; }
+    onFrame(x);
+    raf = requestAnimationFrame(frame);
+  }
+  raf = requestAnimationFrame(frame);
+  return () => { cancelled = true; cancelAnimationFrame(raf); };
+}
+
+// Press feedback
+$$('[data-press]').forEach(b => {
+  const log = b.parentElement.querySelector('.press-log');
+  const set = t => { if (log) log.textContent = t; };
+  const commit = () => { set('Sent'); setTimeout(() => set('Resting'), 1200); };
+  b.addEventListener('pointerdown', () => set('Pressed'));
+  b.addEventListener('pointerup', commit);
+  b.addEventListener('pointerleave', () => { if (log && log.textContent === 'Pressed') set('Resting'); });
+  b.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') set('Pressed'); });
+  b.addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'Enter') commit(); });
+});
+
+// 1:1 drag with a soft edge
+(() => {
+  const track = $('#drag-track'), card = $('#drag-card'), out = $('#drag-x');
+  if (!track) return;
+  const inset = 12;
+  let x = 0, active = false, startX = 0, startPos = 0, lastX = 0, lastT = 0, vx = 0, cancelSpring = null;
+  const max = () => Math.max(0, track.clientWidth - card.offsetWidth - inset * 2);
+  function place(v) {
+    x = v;
+    card.style.transform = `translateX(${v}px)`;
+    out.textContent = Math.round(v) + ' px';
+    card.setAttribute('aria-valuenow', String(Math.round((Math.max(0, Math.min(max(), v)) / Math.max(1, max())) * 100)));
+    card.setAttribute('aria-valuetext', Math.round(v) + ' pixels');
+  }
+  function settle() {
+    if (cancelSpring) cancelSpring();
+    const v = Math.max(-4000, Math.min(4000, vx));
+    const target = Math.max(0, Math.min(max(), x));
+    cancelSpring = spring({ from: x, to: target, velocity: v, onFrame: place });
+  }
+  card.addEventListener('pointerdown', e => {
+    if (cancelSpring) cancelSpring();
+    card.setPointerCapture(e.pointerId);
+    active = true; startX = e.clientX; startPos = x; lastX = e.clientX; lastT = performance.now(); vx = 0;
+  });
+  card.addEventListener('pointermove', e => {
+    if (!active) return;
+    const raw = startPos + (e.clientX - startX);
+    let v = raw;
+    if (raw < 0) v = -rubber(-raw, track.clientWidth / 2);
+    else if (raw > max()) v = max() + rubber(raw - max(), track.clientWidth / 2);
+    place(v);
+    const now = performance.now(), dt = now - lastT;
+    if (dt > 0) { vx = (e.clientX - lastX) / dt * 1000; lastX = e.clientX; lastT = now; }
+  });
+  const end = () => { if (!active) return; active = false; settle(); };
+  card.addEventListener('pointerup', end);
+  card.addEventListener('pointercancel', end);
+  card.addEventListener('lostpointercapture', end);
+  card.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    if (cancelSpring) cancelSpring();
+    const next = Math.max(0, Math.min(max(), x + (e.key === 'ArrowRight' ? 24 : -24)));
+    cancelSpring = spring({ from: x, to: next, onFrame: place });
+  });
+  window.addEventListener('resize', () => { if (!active) place(Math.max(0, Math.min(max(), x))); });
+  place(0);
+})();
+
+// Momentum throw between three slots
+(() => {
+  const track = $('#flick-track'), card = $('#flick-card'), out = $('#flick-slot');
+  if (!track) return;
+  const inset = 12;
+  let index = 0, x = 0, active = false, startX = 0, startPos = 0, lastX = 0, lastT = 0, vx = 0, cancelSpring = null;
+  const step = () => Math.max(1, track.clientWidth - card.offsetWidth - inset * 2);
+  const slot = i => (step() * i) / 2;
+  function place(v) {
+    x = v;
+    card.style.transform = `translateX(${v}px)`;
+  }
+  function label() {
+    out.textContent = (index + 1) + ' of 3';
+    card.setAttribute('aria-valuenow', String(index + 1));
+    card.setAttribute('aria-valuetext', 'Slot ' + (index + 1) + ' of 3');
+  }
+  function settle() {
+    if (cancelSpring) cancelSpring();
+    const v = Math.max(-4000, Math.min(4000, vx));
+    const projected = x + project(v);
+    let nearest = 0, best = Infinity;
+    for (let i = 0; i < 3; i++) {
+      const d = Math.abs(slot(i) - projected);
+      if (d < best) { best = d; nearest = i; }
+    }
+    index = nearest; label();
+    cancelSpring = spring({ from: x, to: slot(index), velocity: v, damping: 0.8, onFrame: place });
+  }
+  card.addEventListener('pointerdown', e => {
+    if (cancelSpring) cancelSpring();
+    card.setPointerCapture(e.pointerId);
+    active = true; startX = e.clientX; startPos = x; lastX = e.clientX; lastT = performance.now(); vx = 0;
+  });
+  card.addEventListener('pointermove', e => {
+    if (!active) return;
+    place(Math.max(-inset, Math.min(step() + inset, startPos + (e.clientX - startX))));
+    const now = performance.now(), dt = now - lastT;
+    if (dt > 0) { vx = (e.clientX - lastX) / dt * 1000; lastX = e.clientX; lastT = now; }
+  });
+  const end = () => { if (!active) return; active = false; settle(); };
+  card.addEventListener('pointerup', end);
+  card.addEventListener('pointercancel', end);
+  card.addEventListener('lostpointercapture', end);
+  card.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    if (cancelSpring) cancelSpring();
+    index = Math.max(0, Math.min(2, index + (e.key === 'ArrowRight' ? 1 : -1)));
+    label();
+    cancelSpring = spring({ from: x, to: slot(index), onFrame: place });
+  });
+  window.addEventListener('resize', () => place(slot(index)));
+  place(0); label();
+})();
+
+// Two springs, one with bounce
+(() => {
+  const a = $('#spring-a'), b = $('#spring-b'), run = $('#spring-run');
+  if (!a || !b || !run) return;
+  let posA = 0, posB = 0, atEnd = false, cancelA = null, cancelB = null;
+  const travel = () => Math.max(0, a.parentElement.clientWidth - a.offsetWidth - 12);
+  function go() {
+    const to = atEnd ? 0 : travel();
+    atEnd = !atEnd;
+    if (cancelA) cancelA();
+    if (cancelB) cancelB();
+    cancelA = spring({ from: posA, to, damping: 1, onFrame: v => { posA = v; a.style.transform = `translateX(${v}px)`; } });
+    cancelB = spring({ from: posB, to, damping: 0.8, onFrame: v => { posB = v; b.style.transform = `translateX(${v}px)`; } });
+  }
+  run.addEventListener('click', go);
+  window.addEventListener('resize', () => {
+    const cap = travel();
+    if (posA > cap) { posA = cap; a.style.transform = `translateX(${cap}px)`; }
+    if (posB > cap) { posB = cap; b.style.transform = `translateX(${cap}px)`; }
+  });
+})();
+
+// Entry and exit paths
+(() => {
+  const fig = $('[data-paths]');
+  if (!fig) return;
+  const panels = $$('[data-path-panel]', fig);
+  let timer = 0;
+  function run() {
+    clearTimeout(timer);
+    panels.forEach(p => { p.classList.add('reset'); p.classList.remove('in', 'out-x', 'out-y'); });
+    void fig.offsetWidth;
+    panels.forEach(p => { p.classList.remove('reset'); p.classList.add('in'); });
+    timer = setTimeout(() => {
+      panels.forEach(p => {
+        p.classList.remove('in');
+        p.classList.add(p.dataset.pathPanel === 'x' ? 'out-x' : 'out-y');
+      });
+    }, 900 * timeScale());
+  }
+  $('[data-paths-btn]', fig).addEventListener('click', run);
+  new IntersectionObserver((entries, obs) => {
+    if (entries[0].isIntersecting) { run(); obs.disconnect(); }
+  }, { threshold: 0.6 }).observe(fig);
+})();
+
+// Undo instead of a dialog
+(() => {
+  const item = $('#undo-item'), del = $('#undo-delete'), msg = $('#undo-msg'), undo = $('#undo-restore');
+  if (!item) return;
+  del.addEventListener('click', () => {
+    item.hidden = true; del.hidden = true;
+    msg.textContent = 'Draft deleted';
+    undo.hidden = false;
+    undo.focus();
+  });
+  undo.addEventListener('click', () => {
+    item.hidden = false; del.hidden = false;
+    msg.textContent = ''; undo.hidden = true;
+    del.focus();
+  });
+})();
+
+// Inline field error
+(() => {
+  const input = $('#email'), err = $('#email-err');
+  if (!input) return;
+  input.addEventListener('input', () => {
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value);
+    input.setAttribute('aria-invalid', String(!ok));
+    err.hidden = ok;
+  });
+})();
+
+// Checklist
+const boxes = () => $$('#checks input').filter(i => i.closest('li').offsetParent !== null);function updateProgress() {
+  const visible = boxes();
+  $('#total').textContent = visible.length;
+  $('#done').textContent = visible.filter(i => i.checked).length;
+}
+$('#checks').addEventListener('change', updateProgress);
+$('#clear').addEventListener('click', () => { $$('#checks input').forEach(i => i.checked = false); updateProgress(); });
+updateProgress();
+
+// Active nav
+const links = $$('.side nav a');
+const spy = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) links.forEach(l => l.setAttribute('aria-current', String(l.getAttribute('href') === '#' + e.target.id)));
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+links.forEach(l => spy.observe($(l.getAttribute('href'))));
+
+// Exit demo
+const xcard = $('#xcard'), xbtn = $('#xcard-btn');
+xbtn.addEventListener('click', () => {
+  const hidden = !xcard.classList.toggle('open');
+  xbtn.textContent = hidden ? 'Show card' : 'Hide card';
+  xbtn.setAttribute('aria-pressed', String(hidden));
+});
+
+// Icon swap
+let copyTimer;
+$('#copy-btn').addEventListener('click', () => {
+  $('#copy-a').classList.add('out'); $('#copy-b').classList.remove('out'); $('#copy-label').textContent = 'Copied';
+  clearTimeout(copyTimer);
+  copyTimer = setTimeout(() => { $('#copy-a').classList.remove('out'); $('#copy-b').classList.add('out'); $('#copy-label').textContent = 'Copy link'; }, 1500 * timeScale());
+});
+
+// No transitions while the theme switches
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  document.documentElement.classList.add('theme-switching');
+  requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove('theme-switching')));
+});
+</script>
+</body>
+</html>
