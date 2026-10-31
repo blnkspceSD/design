@@ -5,32 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Design and motion principles</title>
 <style>
-/* Tokens */
+/* Tokens: named for their job, set in rem so the layout grows with the reader's text size */
 :root {
   color-scheme: light dark;
-  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 72px;
-  --r-float: 16px; --r-card: 10px; --r-pill: 999px;
-  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+  --space-5: 1.5rem; --space-6: 2rem; --space-7: 3rem; --space-8: 4.5rem;
+  --radius-float: 1rem; --radius-card: 0.625rem; --radius-small: 0.375rem; --radius-pill: 999px;
+  --control-height: 2rem; --control-height-sm: 1.5rem; --icon-size: 1rem;
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-code: 0.8125rem; --text-md: 1rem;
+  --text-lg: 1.25rem; --text-xl: 2rem; --text-2xl: 2.75rem;
+  --weight-regular: 400; --weight-medium: 500;
   --dur-fast: 150ms; --dur-normal: 250ms; --dur-slow: 500ms; --stagger: 50ms;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  --press: 0.97;
-  --s0: #f6f6f5; --s1: #ffffff; --s2: #efefed; --s3: #e5e5e2; --float: #ffffff;
-  --text: #1b1b1a; --text-muted: #5f5f5a; --text-faint: #74746f;
-  --accent: #2f5fe3; --accent-hover: #2650cc; --accent-ink: #ffffff;
-  --danger: #a3231c;
-  --shadow-float: 0 12px 32px rgba(20, 20, 20, 0.14), 0 2px 6px rgba(20, 20, 20, 0.08);
+  --press: 0.97; --exit-blur: 4px;
+  --color-bg: #f6f6f5; --color-surface: #ffffff; --color-fill: #efefed; --color-fill-strong: #e5e5e2; --color-float: #ffffff;
+  --color-text: #1b1b1a; --color-text-muted: #55554f; --color-text-faint: #6a6a65;
+  --color-accent-solid: #2f5fe3; --color-accent-solid-hover: #2650cc; --color-accent-ink: #ffffff;
+  --color-danger: #a3231c;
+  --color-image-edge: rgb(0 0 0 / 0.08);
+  --color-edge: transparent;
+  --shadow-float: 0 12px 32px rgb(20 20 20 / 0.14), 0 2px 6px rgb(20 20 20 / 0.08);
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --s0: #111110; --s1: #1a1a19; --s2: #242423; --s3: #2f2f2d; --float: #2a2a28;
-    --text: #ededeb; --text-muted: #a3a39e; --text-faint: #86867f;
-    --accent: #7b97ff; --accent-hover: #93abff; --accent-ink: #0b1220;
-    --danger: #ff9b93;
-    --shadow-float: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4);
+    --color-bg: #111110; --color-surface: #1a1a19; --color-fill: #242423; --color-fill-strong: #2f2f2d; --color-float: #2a2a28;
+    --color-text: #ededeb; --color-text-muted: #b0b0aa; --color-text-faint: #93938c;
+    --color-accent-solid: #7b97ff; --color-accent-solid-hover: #93abff; --color-accent-ink: #0b1220;
+    --color-danger: #ff9b93;
+    --color-image-edge: rgb(255 255 255 / 0.08);
+    --shadow-float: 0 12px 32px rgb(0 0 0 / 0.5), 0 2px 6px rgb(0 0 0 / 0.4);
   }
+}
+/* More contrast: stronger secondary text, and floating layers get a defined edge */
+@media (prefers-contrast: more) {
+  :root { --color-text-muted: var(--color-text); --color-text-faint: var(--color-text); --color-edge: var(--color-text); }
+}
+/* Touch screens: controls grow to a 44px hit area */
+@media (pointer: coarse) {
+  :root { --control-height: 2.75rem; --control-height-sm: 2.75rem; }
 }
 body {
   --slow: 1;
@@ -42,308 +58,329 @@ body[data-slow] { --slow: 5; }
 
 /* Base */
 * { box-sizing: border-box; margin: 0; }
-html { scroll-behavior: smooth; scroll-padding-top: var(--sp-6); }
-body { background: var(--s0); color: var(--text); font: 400 16px/1.55 var(--font-sans); -webkit-font-smoothing: antialiased; }
-a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
-code, .mono { font-family: var(--font-mono); font-size: 13px; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+html { scroll-padding-top: var(--space-6); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body { background: var(--color-bg); color: var(--color-text); font: var(--weight-regular) var(--text-md)/1.55 var(--font-sans); overflow-wrap: break-word; }
+a { color: inherit; text-decoration: underline; text-underline-position: from-font; text-decoration-skip-ink: auto; }
+code, .mono { font-family: var(--font-mono); font-size: var(--text-code); font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--color-accent-solid); outline-offset: 2px; }
 button { font: inherit; color: inherit; }
+h1, h2, h3, h4 { font-weight: var(--weight-medium); text-wrap: balance; }
+.skip { position: absolute; left: var(--space-4); top: var(--space-4); z-index: 10; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--color-float); box-shadow: var(--shadow-float); transform: translateY(-200%); }
+.skip:focus-visible { transform: none; }
+
+/* Type roles */
+.t-title { font-size: var(--text-lg); line-height: 1.3; letter-spacing: -0.005em; font-weight: var(--weight-medium); }
+.t-strong { font-weight: var(--weight-medium); }
+.c-read { color: var(--color-text); }
+.c-muted { color: var(--color-text-muted); }
+.c-faint { color: var(--color-text-faint); font-size: var(--text-xs); line-height: 1.4; letter-spacing: 0.01em; }
+
+/* Spacing helpers, all from the scale */
+.gap-1 { gap: var(--space-1) !important; } .gap-3 { gap: var(--space-3) !important; } .gap-4 { gap: var(--space-4) !important; }
+.mt-2 { margin-top: var(--space-2); } .mt-3 { margin-top: var(--space-3); } .mt-4 { margin-top: var(--space-4); } .mt-5 { margin-top: var(--space-5); } .mt-6 { margin-top: var(--space-6); }
+.pad-1 { padding: var(--space-1); }
 
 /* Shell */
-.shell { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: var(--sp-7); max-width: 1240px; margin: 0 auto; padding: 0 var(--sp-6); }
-.side { position: sticky; top: 0; align-self: start; height: 100vh; padding: var(--sp-6) 0; display: flex; flex-direction: column; gap: var(--sp-5); }
-.side h1 { font-size: 16px; font-weight: 500; }
-.side nav { display: grid; gap: var(--sp-1); }
-.side nav a { padding: var(--sp-2) var(--sp-3); border-radius: var(--r-card); color: var(--text-muted); font-size: 14px; text-decoration: none; transition: background-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out); }
-.side nav a[aria-current="true"] { background: var(--s2); color: var(--text); }
-.side .files { margin-top: auto; display: grid; gap: var(--sp-1); font-size: 13px; color: var(--text-muted); }
-main { padding: var(--sp-7) 0 var(--sp-8); min-width: 0; }
+.shell { display: grid; grid-template-columns: 14.5rem minmax(0, 1fr); gap: var(--space-7); max-width: 77.5rem; margin: 0 auto; padding: 0 var(--space-6); }
+.side { position: sticky; top: 0; align-self: start; height: 100vh; padding: var(--space-6) 0; display: flex; flex-direction: column; gap: var(--space-5); }
+.side .home { font-weight: var(--weight-medium); text-decoration: none; }
+.side nav { display: grid; gap: var(--space-1); }
+.side nav a { display: block; padding: var(--space-2) var(--space-3); margin-inline: calc(var(--space-3) * -1); border-radius: var(--radius-card); color: var(--color-text-muted); font-size: var(--text-sm); text-decoration: none; transition: background-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out); }
+.side nav a[aria-current="true"] { background: var(--color-fill); color: var(--color-text); }
+@media (hover: hover) { .side nav a:hover { color: var(--color-text); } }
+.side .files { margin-top: auto; display: grid; gap: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted); }
+main { padding: var(--space-7) 0 var(--space-8); min-width: 0; }
 
 /* Layer switch */
-.seg { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-1); padding: var(--sp-1); background: var(--s2); border-radius: var(--r-pill); }
-.seg button { border: 0; background: none; height: 28px; border-radius: var(--r-pill); font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: background-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out); }
-.seg button[aria-checked="true"] { background: var(--accent); color: var(--accent-ink); }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-1); padding: var(--space-1); background: var(--color-fill); border-radius: var(--radius-pill); }
+.seg button { border: 0; background: none; height: calc(var(--control-height) - var(--space-1)); border-radius: var(--radius-pill); font-size: var(--text-sm); font-weight: var(--weight-medium); color: var(--color-text-muted); cursor: pointer; transition: background-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out); }
+.seg button[aria-checked="true"] { background: var(--color-accent-solid); color: var(--color-accent-ink); }
 .seg button:active { transform: scale(var(--press)); }
 
-/* Sections and principles */
-.hero { padding-bottom: var(--sp-5); }
-.hero h2 { font-size: 44px; line-height: 1.1; font-weight: 500; }
-.hero p { margin-top: var(--sp-4); max-width: 56ch; color: var(--text-muted); font-size: 18px; }
-section { padding-top: var(--sp-7); }
-section > h2 { font-size: 32px; line-height: 1.15; font-weight: 500; }
-section > .lede { margin-top: var(--sp-2); max-width: 60ch; color: var(--text-muted); }
-.p { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--sp-6); padding: var(--sp-6) 0 0; align-items: start; }
-.p h3 { font-size: 20px; line-height: 1.3; font-weight: 500; }
-.p .text > p { margin-top: var(--sp-2); font-size: 15px; color: var(--text-muted); }
-.eyebrow { display: none; font-size: 12px; color: var(--text-faint); margin-bottom: var(--sp-1); }
+/* Sections and principles. Between groups is always at least twice the gap inside them */
+.hero { padding-bottom: var(--space-5); }
+.hero h1 { font-size: var(--text-2xl); line-height: 1.08; letter-spacing: -0.02em; }
+.hero p { margin-top: var(--space-4); max-width: 62ch; color: var(--color-text-muted); font-size: var(--text-lg); line-height: 1.45; text-wrap: pretty; }
+section { padding-top: var(--space-8); }
+section > h2 { font-size: var(--text-xl); line-height: 1.15; letter-spacing: -0.015em; scroll-margin-top: var(--space-6); }
+section > .lede { margin-top: var(--space-2); max-width: 65ch; color: var(--color-text-muted); }
+.p { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-6); padding-top: var(--space-6); align-items: start; }
+.p h3 { font-size: var(--text-lg); line-height: 1.3; letter-spacing: -0.005em; }
+.p .text > p { margin-top: var(--space-2); color: var(--color-text-muted); }
+.p .text > p, .lede, .note { text-wrap: pretty; }
+.eyebrow { display: none; font-size: var(--text-xs); letter-spacing: 0.01em; color: var(--color-text-faint); margin-bottom: var(--space-1); }
 body[data-layer="editor"] [data-editor] .eyebrow { display: block; }
 body:not([data-layer="editor"]) [data-editor] { display: none; }
-@media (max-width: 900px) {
-  .shell { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 var(--sp-4); }
+@media (max-width: 56rem) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 var(--space-4); }
   .side { position: static; height: auto; padding-bottom: 0; }
-  .side nav { grid-auto-flow: column; overflow-x: auto; }
+  .side nav { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+  .side nav a { margin-inline: 0; background: var(--color-fill); border-radius: var(--radius-pill); padding: var(--space-1) var(--space-3); white-space: nowrap; }
   .side .files { display: none; }
-  .p { grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
-  .hero h2 { font-size: 32px; }
+  .p { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+  .hero h1 { font-size: var(--text-xl); letter-spacing: -0.015em; }
 }
 
 /* Specimens */
-.pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
-@media (max-width: 560px) { .pair { grid-template-columns: 1fr; } }
-.ex figcaption { font-size: 12px; color: var(--text-faint); margin-bottom: var(--sp-2); }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+@media (max-width: 35rem) { .pair { grid-template-columns: 1fr; } }
+.ex figcaption { font-size: var(--text-xs); letter-spacing: 0.01em; color: var(--color-text-faint); margin-bottom: var(--space-2); }
 .pair .ex { display: flex; flex-direction: column; }
 .pair .ex-body { flex: 1; }
-.ex-body { background: var(--s1); border-radius: var(--r-card); padding: var(--sp-4); }
-.ex-body + .ex-body { margin-top: var(--sp-3); }
-.note { margin-top: var(--sp-3); font-size: 13px; color: var(--text-muted); }
-.bar { height: 8px; border-radius: 4px; background: var(--s3); }
+.ex-body { background: var(--color-surface); border-radius: var(--radius-card); padding: var(--space-4); font-size: var(--text-sm); line-height: 1.45; }
+.ex-body.bare { background: none; padding: 0; }
+.note { margin-top: var(--space-3); font-size: var(--text-sm); color: var(--color-text-muted); }
+.bar { height: var(--space-2); border-radius: var(--radius-pill); background: var(--color-fill-strong); }
 .w40 { width: 40%; } .w60 { width: 60%; } .w90 { width: 90%; }
-.grp { display: grid; gap: var(--sp-2); }
-.stack-do { display: grid; gap: var(--sp-5); }
-.stack-even { display: grid; gap: var(--sp-3); }
+.grp { display: grid; gap: var(--space-2); }
+.stack-do { display: grid; gap: var(--space-5); }
+.stack-even { display: grid; gap: var(--space-3); }
+.stack-pairs { display: grid; gap: var(--space-6); }
 .rows { display: grid; }
-.row { display: grid; grid-template-columns: 16px 1fr auto; gap: var(--sp-3); align-items: center; height: 32px; font-size: 14px; }
-.row .n { font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; text-align: right; color: var(--text-muted); }
-.row .ico { color: var(--text-muted); }
-button.row { width: 100%; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
-.row.sel { background: var(--s2); border-radius: var(--r-card); margin: 0 calc(var(--sp-2) * -1); padding: 0 var(--sp-2); }
-.row.sel { grid-template-columns: 16px 1fr auto; }
+.row { display: grid; grid-template-columns: var(--icon-size) 1fr auto; gap: var(--space-3); align-items: center; height: var(--control-height); padding-inline: var(--space-2); margin-inline: calc(var(--space-2) * -1); border-radius: var(--radius-small); font-size: var(--text-sm); }
+.row.row-plain { grid-template-columns: 1fr; }
+.row .n { font-family: var(--font-mono); font-size: var(--text-code); font-variant-numeric: tabular-nums; text-align: right; color: var(--color-text-muted); }
+.row .ico { color: var(--color-text-muted); }
+.row.sel { background: var(--color-fill); }
+button.row { width: calc(100% + var(--space-4)); border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; transition: background-color var(--t-fast) var(--ease-out); }
+button.row.sel { background: var(--color-fill); }
+@media (hover: hover) { .pick .row:hover { background: var(--color-fill); } }
+/* The Avoid list: stray heights and nudges on purpose */
 .messy .row:nth-child(1) { height: 28px; }
 .messy .row:nth-child(2) { height: 40px; }
 .messy .row:nth-child(2) .ico { margin-left: 6px; }
 .messy .row:nth-child(3) .ico { margin-top: -3px; }
 .messy .row .n { text-align: left; font-family: var(--font-sans); }
-.ico { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; flex: none; }
-.chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
-.chip { height: 24px; padding: 0 var(--sp-3); border-radius: var(--r-pill); background: var(--s2); font-size: 13px; display: inline-flex; align-items: center; white-space: nowrap; }
-.clip { display: flex; gap: var(--sp-2); overflow: hidden; }
-.narrow { max-width: 180px; }
-.stage-note { margin-top: var(--sp-3); }
-.stat { display: flex; justify-content: space-between; font-size: 14px; padding: var(--sp-1) 0; }
-.stat span:last-child { font-family: var(--font-mono); font-size: 13px; }
-.c-read { color: var(--text); } .c-muted { color: var(--text-muted); } .c-faint { color: var(--text-faint); font-size: 12px; }
-pre { font-family: var(--font-mono); font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
-pre .no { color: var(--text-faint); }
-.float { background: var(--float); border-radius: var(--r-card); box-shadow: var(--shadow-float); padding: var(--sp-1); }
-.float .item { padding: var(--sp-2) var(--sp-3); font-size: 14px; border-radius: 6px; }
-.float .item.sel { background: var(--s2); }
-.tip { display: inline-block; background: var(--float); box-shadow: var(--shadow-float); border-radius: 6px; padding: var(--sp-1) var(--sp-2); font-size: 12px; margin-bottom: var(--sp-2); }
+.ico { width: var(--icon-size); height: var(--icon-size); stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.chip { height: var(--control-height-sm); padding: 0 var(--space-3); border-radius: var(--radius-pill); background: var(--color-fill); display: inline-flex; align-items: center; white-space: nowrap; }
+.clip { display: flex; gap: var(--space-2); overflow: hidden; }
+.narrow { max-width: 11.25rem; }
+.stat { display: flex; justify-content: space-between; padding: var(--space-1) 0; }
+pre { font-family: var(--font-mono); font-size: var(--text-code); line-height: 1.6; white-space: pre-wrap; }
+pre .no { color: var(--color-text-faint); }
+.float { background: var(--color-float); border-radius: var(--radius-card); box-shadow: var(--shadow-float), 0 0 0 1px var(--color-edge); padding: var(--space-1); }
+.float .item { padding: var(--space-2) var(--space-3); border-radius: var(--radius-small); }
+.float .item.sel { background: var(--color-fill); }
+.tip { display: inline-block; background: var(--color-float); box-shadow: var(--shadow-float), 0 0 0 1px var(--color-edge); border-radius: var(--radius-small); padding: var(--space-1) var(--space-2); font-size: var(--text-xs); letter-spacing: 0.01em; }
+.tip.static { justify-self: start; }
 
 /* Controls */
-.btn { height: 32px; padding: 0 var(--sp-4); border: 0; border-radius: var(--r-pill); background: var(--s2); color: var(--text); font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out); }
-.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn { height: var(--control-height); padding: 0 var(--space-4); border: 0; border-radius: var(--radius-pill); background: var(--color-fill); color: var(--color-text); font-size: var(--text-sm); font-weight: var(--weight-medium); white-space: nowrap; cursor: pointer; transition: background-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out); }
+.btn.btn-sm { height: calc(var(--control-height) - var(--space-1)); }
+.btn.primary { background: var(--color-accent-solid); color: var(--color-accent-ink); }
 .btn:active, .btn.is-pressed { transform: scale(var(--press)); }
-.btn[aria-pressed="true"], .btn.is-selected { background: var(--accent); color: var(--accent-ink); }
-.btn:disabled, .btn.is-disabled { background: var(--s2); color: var(--text-faint); cursor: not-allowed; transform: none; }
-.btn.is-hover { background: var(--s3); }
-.btn.icon { width: 32px; padding: 0; display: inline-grid; place-items: center; }
+.btn[aria-pressed="true"], .btn.is-selected { background: var(--color-accent-solid); color: var(--color-accent-ink); }
+.btn:disabled, .btn.is-disabled { background: var(--color-fill); color: var(--color-text-faint); cursor: not-allowed; transform: none; }
+.btn.is-hover { background: var(--color-fill-strong); }
+.btn.icon { width: var(--control-height); padding: 0; display: inline-grid; place-items: center; }
 @media (hover: hover) {
-  .btn:hover:not(:disabled) { background: var(--s3); }
-  .btn.primary:hover:not(:disabled), .btn[aria-pressed="true"]:hover { background: var(--accent-hover); }
-  .row.sel, .pick .row:hover { background: var(--s2); }
+  .btn:hover:not(:disabled) { background: var(--color-fill-strong); }
+  .btn.primary:hover:not(:disabled), .btn[aria-pressed="true"]:hover, .btn.is-selected:hover { background: var(--color-accent-solid-hover); }
 }
-.btn.is-focus { outline: 2px solid var(--accent); outline-offset: 2px; }
-.btns { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; }
-.sw { width: 40px; height: 24px; border: 0; border-radius: var(--r-pill); background: var(--s3); position: relative; cursor: pointer; flex: none; transition: background-color var(--t-fast) var(--ease-out); }
-.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--text-faint); transition: transform var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out); }
-.sw[aria-checked="true"] { background: var(--accent); }
-.sw[aria-checked="true"]::after { transform: translateX(16px); background: var(--accent-ink); }
-.tog { display: inline-flex; align-items: center; gap: var(--sp-2); font-size: 14px; }
+.btn.is-focus { outline: 2px solid var(--color-accent-solid); outline-offset: 2px; }
+.btns { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.btns.col { flex-direction: column; align-items: flex-start; }
+.btns.end { justify-content: flex-end; }
+.sw { width: 2.5rem; height: 1.5rem; border: 0; border-radius: var(--radius-pill); background: var(--color-fill-strong); position: relative; cursor: pointer; flex: none; transition: background-color var(--t-fast) var(--ease-out); }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 1.25rem; height: 1.25rem; border-radius: 50%; background: var(--color-text-faint); transition: transform var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out); }
+.sw[aria-checked="true"] { background: var(--color-accent-solid); }
+.sw[aria-checked="true"]::after { transform: translateX(1rem); background: var(--color-accent-ink); }
+.tog { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); }
 .tipwrap { position: relative; display: inline-block; }
-.tipwrap .tip { position: absolute; bottom: calc(100% + var(--sp-1)); left: 50%; transform: translateX(-50%); margin: 0; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity var(--t-fast) var(--ease-out); }
+.tipwrap .tip { position: absolute; bottom: calc(100% + var(--space-1)); left: 50%; transform: translateX(-50%); white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity var(--t-fast) var(--ease-out); }
 .tipwrap:focus-within .tip { opacity: 1; }
 @media (hover: hover) { .tipwrap:hover .tip { opacity: 1; } }
 
-/* Fields used in specimens */
-.field { display: grid; gap: var(--sp-2); }
-.field label { font-size: 13px; color: var(--text-muted); }
-.input { height: 32px; border: 0; border-radius: var(--r-card); background: var(--s2); padding: 0 var(--sp-3); font: inherit; font-size: 14px; color: var(--text); width: 100%; }
-.input::placeholder { color: var(--text-faint); }
-.swatches { display: flex; gap: var(--sp-2); }
-.swatches i { width: 20px; height: 20px; border-radius: 50%; display: block; }
-.slider { height: 4px; border-radius: 2px; background: var(--s3); position: relative; }
-.slider::before { content: ""; position: absolute; inset: 0 20% 0 0; background: var(--accent); border-radius: 2px; }
-.slider::after { content: ""; position: absolute; top: -6px; left: calc(80% - 8px); width: 16px; height: 16px; border-radius: 50%; background: var(--accent); }
-.space-between { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; }
+/* Fields */
+.field { display: grid; gap: var(--space-2); }
+.field label { font-size: var(--text-sm); color: var(--color-text-muted); }
+.input { height: var(--control-height); border: 0; border-radius: var(--radius-pill); background: var(--color-fill); padding: 0 var(--space-3); font: inherit; font-size: var(--text-sm); color: var(--color-text); width: 100%; }
+.input::placeholder { color: var(--color-text-faint); }
+.swatches { display: flex; gap: var(--space-2); }
+.swatches i { width: 1.25rem; height: 1.25rem; border-radius: 50%; display: block; }
+.slider { height: var(--space-1); border-radius: var(--radius-pill); background: var(--color-fill-strong); position: relative; }
+.slider::before { content: ""; position: absolute; inset: 0 20% 0 0; background: var(--color-accent-solid); border-radius: var(--radius-pill); }
+.slider::after { content: ""; position: absolute; top: calc(50% - var(--space-2)); left: calc(80% - var(--space-2)); width: var(--space-4); height: var(--space-4); border-radius: 50%; background: var(--color-accent-solid); }
+.space-between { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+.field-err { font-size: var(--text-sm); color: var(--color-danger); display: flex; gap: var(--space-1); align-items: center; }
+.field-err .ico { width: 0.875rem; height: 0.875rem; }
+[hidden] { display: none !important; }
 
-/* Slop */
-.slop { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); margin-top: var(--sp-6); }
-.slop div { background: var(--s1); border-radius: var(--r-card); padding: var(--sp-4); }
-.slop h3 { font-size: 16px; font-weight: 500; }
-.slop p { margin-top: var(--sp-1); font-size: 14px; color: var(--text-muted); }
-@media (max-width: 700px) { .slop { grid-template-columns: 1fr; } }
+/* Card grids: principles, slop, build notes */
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); margin-top: var(--space-5); }
+.cards > * { background: var(--color-surface); border-radius: var(--radius-card); padding: var(--space-4); }
+.cards h3 { font-size: var(--text-md); line-height: 1.4; }
+.cards p { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted); }
+@media (max-width: 44rem) { .cards { grid-template-columns: 1fr; } }
 
-/* Motion */
-.toolbar { display: flex; flex-wrap: wrap; gap: var(--sp-5); margin-top: var(--sp-5); }
-.stage { position: relative; height: 320px; border-radius: var(--r-float); background: var(--s1); overflow: hidden; margin-top: var(--sp-4); }
-.stage-main { padding: var(--sp-5); display: grid; gap: var(--sp-4); align-content: start; transition: transform var(--t-fast) var(--ease-drawer); }
-.stage.drawer-open .stage-main { transform: translateX(calc(var(--sp-3) * -1)); transition-duration: var(--t-normal); }
-.stage-main .bar { height: 12px; }
-.pop, .drawer, .dialog { opacity: 0; visibility: hidden; transition: opacity var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out), visibility 0s linear var(--t-fast); }
-.pop.open, .drawer.open, .dialog.open { opacity: 1; visibility: visible; transform: none; transition: opacity var(--t-normal) var(--ease-out), transform var(--t-normal) var(--ease-out), visibility 0s; }
-.drawer { transition-timing-function: var(--ease-drawer), var(--ease-drawer), linear; }
-.pop { position: absolute; left: var(--sp-5); top: 72px; width: 180px; transform: scale(0.95); transform-origin: top left; }
-.drawer { position: absolute; top: 0; right: 0; bottom: 0; width: 220px; padding: var(--sp-5); background: var(--float); box-shadow: var(--shadow-float); transform: translateX(100%); display: grid; gap: var(--sp-3); align-content: start; }
-.drawer.open { transition-property: opacity, transform, visibility; transition-timing-function: var(--ease-drawer), var(--ease-drawer), linear; }
+/* Motion playground */
+.toolbar { display: flex; flex-wrap: wrap; gap: var(--space-5); margin-top: var(--space-5); }
+.stage { position: relative; height: 20rem; border-radius: var(--radius-float); background: var(--color-surface); overflow: hidden; margin-top: var(--space-4); }
+.stage-main { padding: var(--space-5); display: grid; gap: var(--space-4); align-content: start; transition: transform var(--t-fast) var(--ease-drawer); }
+.stage.drawer-open .stage-main { transform: translateX(calc(var(--space-3) * -1)); transition-duration: var(--t-normal); }
+.stage-main .bar { height: var(--space-3); }
+/* Closed: leaves in 150ms with a fade and a 4px blur. Open: arrives in 250ms */
+.pop, .drawer, .dialog { opacity: 0; visibility: hidden; filter: blur(var(--exit-blur)); transition: opacity var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out), filter var(--t-fast) var(--ease-out), visibility 0s linear var(--t-fast); }
+.pop.open, .drawer.open, .dialog.open { opacity: 1; visibility: visible; transform: none; filter: none; transition: opacity var(--t-normal) var(--ease-out), transform var(--t-normal) var(--ease-out), filter 0s, visibility 0s; }
+.drawer, .drawer.open { transition-timing-function: var(--ease-drawer); }
+.pop { position: absolute; left: var(--space-5); top: calc(var(--space-5) + var(--control-height) + var(--space-1)); width: 11.25rem; transform: scale(0.95); transform-origin: top left; font-size: var(--text-sm); }
+.drawer { position: absolute; top: 0; right: 0; bottom: 0; width: 13.75rem; padding: var(--space-5); background: var(--color-float); box-shadow: var(--shadow-float), 0 0 0 1px var(--color-edge); transform: translateX(100%); display: grid; gap: var(--space-3); align-content: start; font-size: var(--text-sm); }
 .dialog-wrap { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
-.dialog { width: 260px; padding: var(--sp-5); background: var(--float); box-shadow: var(--shadow-float); border-radius: var(--r-float); transform: scale(0.96); transform-origin: center; display: grid; gap: var(--sp-3); }
+.dialog { width: 16.25rem; padding: var(--space-5); background: var(--color-float); box-shadow: var(--shadow-float), 0 0 0 1px var(--color-edge); border-radius: var(--radius-float); transform: scale(0.96); transform-origin: center; display: grid; gap: var(--space-3); font-size: var(--text-sm); }
 .dialog.open { pointer-events: auto; }
-.stage h4 { font-size: 15px; font-weight: 500; }
+.stage h4 { font-size: var(--text-md); }
 body[data-reduced] .mv { transform: none !important; }
-@media (prefers-reduced-motion: reduce) { .mv { transform: none !important; } }
+@media (prefers-reduced-motion: reduce) { .mv, .btn:active, .seg button:active { transform: none !important; } }
 
+/* Replays */
 .rp { transition: transform var(--t-slow) var(--ease-out), opacity var(--t-slow) var(--ease-out); }
 .reset { transition: none !important; }
-.track { height: 24px; position: relative; }
-.track + .track { margin-top: var(--sp-3); }
-.track .lbl { position: absolute; left: var(--sp-3); top: 0; line-height: 24px; font-size: 12px; color: var(--text-faint); }
-.dot { position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); transform: translateX(0); }
+.replay { margin-top: var(--space-3); }
+.track { height: var(--control-height-sm); position: relative; }
+.track + .track { margin-top: var(--space-3); }
+.track .lbl { position: absolute; z-index: 1; left: 2.25rem; top: 0; line-height: var(--control-height-sm); font-size: var(--text-xs); color: var(--color-text-faint); }
+.track .rail { position: absolute; left: 0; right: 0; top: calc(50% - 1px); height: 2px; background: var(--color-fill); border-radius: var(--radius-pill); }
+.dot { position: absolute; left: 0; top: 0; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--color-accent-solid); transform: translateX(0); }
 .dot.go { transform: translateX(var(--dist, 200px)); }
 .dot.e-out { transition: transform var(--t-slow) var(--ease-out); }
 .dot.e-io { transition: transform var(--t-slow) var(--ease-in-out); }
 .dot.e-dr { transition: transform var(--t-slow) var(--ease-drawer); }
-.dot.e-in { transition: transform var(--t-slow) cubic-bezier(0.42, 0, 1, 1); background: var(--text-faint); }
-.track .rail { position: absolute; left: 0; right: 0; top: 11px; height: 2px; background: var(--s2); border-radius: 1px; }
-.track .lbl { z-index: 1; left: 36px; }
-.curves { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-3); margin-bottom: var(--sp-4); }
-.curves svg { width: 100%; aspect-ratio: 1; display: block; background: var(--s2); border-radius: var(--r-card); }
-.curves path { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
-.curves .avoid path { stroke: var(--text-faint); }
-.curves span { display: block; margin-top: var(--sp-1); font-size: 12px; color: var(--text-muted); }
-.timebar { height: 12px; border-radius: 6px; background: var(--accent); transform: scaleX(0); transform-origin: left; }
+.dot.e-in { transition: transform var(--t-slow) cubic-bezier(0.42, 0, 1, 1); background: var(--color-text-faint); }
+.curves { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); }
+.curves svg { width: 100%; aspect-ratio: 1; display: block; background: var(--color-fill); border-radius: var(--radius-card); }
+.curves path { fill: none; stroke: var(--color-accent-solid); stroke-width: 3; stroke-linecap: round; }
+.curves .avoid path { stroke: var(--color-text-faint); }
+.curves span { display: block; margin-top: var(--space-1); font-size: var(--text-xs); color: var(--color-text-muted); }
+@media (max-width: 35rem) { .curves { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.timebar { height: var(--space-3); border-radius: var(--radius-pill); background: var(--color-accent-solid); transform: scaleX(0); transform-origin: left; }
 .timebar.go { transform: scaleX(1); }
-.tb-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: var(--sp-1); }
-.tb-wrap + .tb-wrap { margin-top: var(--sp-3); }
-.enter { display: flex; gap: var(--sp-5); align-items: center; }
-.sq { width: 72px; height: 72px; border-radius: var(--r-card); background: var(--accent); opacity: 0; }
+.tb-label { display: flex; justify-content: space-between; color: var(--color-text-muted); margin-bottom: var(--space-1); }
+.tb-wrap + .tb-wrap { margin-top: var(--space-3); }
+.enter { display: flex; gap: var(--space-5); align-items: center; }
+.sq { width: 4.5rem; height: 4.5rem; border-radius: var(--radius-card); background: var(--color-accent-solid); opacity: 0; }
 .sq.good { transform: scale(0.95); }
-.sq.bad { transform: scale(0); background: var(--text-faint); }
+.sq.bad { transform: scale(0); background: var(--color-text-faint); }
 .sq.go { opacity: 1; transform: none; }
-.replay { margin-top: var(--sp-3); }
-.freq { display: grid; gap: var(--sp-2); }
-.freq .fr { display: grid; grid-template-columns: 96px minmax(0, 1fr) 56px; grid-template-areas: "b ex m" "b mo m"; column-gap: var(--sp-4); row-gap: var(--sp-1); align-items: center; background: var(--s1); border-radius: var(--r-card); padding: var(--sp-3) var(--sp-4); font-size: 14px; }
-.freq .fr b { font-weight: 500; grid-area: b; }
-.freq .fr .ex-t { grid-area: ex; }
-.freq .fr .mo { grid-area: mo; color: var(--text-faint); font-size: 13px; }
+.freq { display: grid; gap: var(--space-2); }
+.freq .fr { display: grid; grid-template-columns: 6rem minmax(0, 1fr) 3.5rem; grid-template-areas: "b ex m" "b mo m"; column-gap: var(--space-4); row-gap: var(--space-1); align-items: center; background: var(--color-surface); border-radius: var(--radius-card); padding: var(--space-3) var(--space-4); font-size: var(--text-sm); }
+.freq .fr b { font-weight: var(--weight-medium); grid-area: b; }
+.freq .fr .ex-t { grid-area: ex; color: var(--color-text-muted); }
+.freq .fr .mo { grid-area: mo; color: var(--color-text-faint); font-size: var(--text-xs); }
 .freq .fr .meter { grid-area: m; }
-.freq .fr .ex-t, .freq .fr .mo { color: var(--text-muted); }
-.freq .meter { height: 6px; border-radius: 3px; background: var(--s3); position: relative; }
-.freq .meter i { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: var(--accent); }
-.tokens { display: grid; gap: var(--sp-2); margin-top: var(--sp-5); }
-.tokens .tr { display: grid; grid-template-columns: 160px 1fr 1.4fr; gap: var(--sp-4); align-items: baseline; background: var(--s1); border-radius: var(--r-card); padding: var(--sp-3) var(--sp-4); font-size: 14px; }
-.tokens .tr span:nth-child(1) { font-weight: 500; }
-.tokens .tr span:nth-child(2) { font-family: var(--font-mono); font-size: 13px; }
-.tokens .tr span:nth-child(3) { color: var(--text-muted); }
-@media (max-width: 700px) { .tokens .tr { grid-template-columns: 1fr; gap: var(--sp-1); } }
-.durs { margin-top: var(--sp-5); }
+.freq .meter { height: 6px; border-radius: var(--radius-pill); background: var(--color-fill-strong); position: relative; }
+.freq .meter i { position: absolute; inset: 0 auto 0 0; border-radius: var(--radius-pill); background: var(--color-accent-solid); }
+@media (max-width: 35rem) { .freq .fr { grid-template-columns: minmax(0, 1fr) 3.5rem; grid-template-areas: "b m" "ex ex" "mo mo"; } }
+.tokens { display: grid; gap: var(--space-2); margin-top: var(--space-5); }
+.tokens .tr { display: grid; grid-template-columns: 10rem minmax(0, 1fr) minmax(0, 1.4fr); gap: var(--space-4); align-items: baseline; background: var(--color-surface); border-radius: var(--radius-card); padding: var(--space-3) var(--space-4); font-size: var(--text-sm); }
+.tokens .tr span:nth-child(1) { font-weight: var(--weight-medium); }
+.tokens .tr span:nth-child(2) { font-family: var(--font-mono); font-size: var(--text-code); }
+.tokens .tr span:nth-child(3) { color: var(--color-text-muted); }
+@media (max-width: 44rem) { .tokens .tr { grid-template-columns: 1fr; gap: var(--space-1); } }
+.durs { margin-top: var(--space-5); }
 
 /* Checklist */
-.progress { margin-top: var(--sp-4); display: flex; gap: var(--sp-4); align-items: center; font-size: 14px; color: var(--text-muted); }
-.progress .mono { font-variant-numeric: tabular-nums; color: var(--text); }
-.checks { list-style: none; padding: 0; margin-top: var(--sp-4); display: grid; gap: var(--sp-1); }
-.checks li { display: flex; }
-.checks label { display: flex; gap: var(--sp-3); align-items: center; width: 100%; padding: var(--sp-2) var(--sp-3); border-radius: var(--r-card); cursor: pointer; font-size: 15px; transition: background-color var(--t-fast) var(--ease-out); }
-@media (hover: hover) { .checks label:hover { background: var(--s1); } }
+.progress { margin-top: var(--space-4); display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; font-size: var(--text-sm); color: var(--color-text-muted); }
+.progress .mono { color: var(--color-text); }
+.checks { list-style: none; padding: 0; margin-top: var(--space-4); display: grid; gap: var(--space-1); }
+.checks li { display: flex; position: relative; }
+.checks label { display: flex; gap: var(--space-3); align-items: center; width: 100%; min-height: var(--control-height); padding: var(--space-1) var(--space-3); margin-inline: calc(var(--space-3) * -1); border-radius: var(--radius-card); cursor: pointer; transition: background-color var(--t-fast) var(--ease-out); }
+@media (hover: hover) { .checks label:hover { background: var(--color-surface); } }
 .checks input { position: absolute; opacity: 0; pointer-events: none; }
-.box { width: 18px; height: 18px; border-radius: 5px; background: var(--s3); flex: none; position: relative; transition: background-color var(--t-fast) var(--ease-out); }
-.box::after { content: ""; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid var(--accent-ink); border-width: 0 2px 2px 0; transform: rotate(45deg); opacity: 0; transition: opacity var(--t-fast) var(--ease-out); }
-.checks input:checked + .box { background: var(--accent); }
+.box { width: 1.125rem; height: 1.125rem; border-radius: var(--radius-small); background: var(--color-fill-strong); flex: none; position: relative; transition: background-color var(--t-fast) var(--ease-out); }
+.box::after { content: ""; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid var(--color-accent-ink); border-width: 0 2px 2px 0; transform: rotate(45deg); opacity: 0; transition: opacity var(--t-fast) var(--ease-out); }
+.checks input:checked + .box { background: var(--color-accent-solid); }
 .checks input:checked + .box::after { opacity: 1; }
-.checks input:focus-visible + .box { outline: 2px solid var(--accent); outline-offset: 2px; }
-.checks .group { margin-top: var(--sp-5); font-size: 13px; color: var(--text-faint); padding: 0 var(--sp-3); }
-.sources { margin-top: var(--sp-8); font-size: 14px; color: var(--text-muted); max-width: 70ch; }
-.sources ul { margin-top: var(--sp-3); padding-left: var(--sp-5); display: grid; gap: var(--sp-2); }
-.sources h2 { font-size: 20px; font-weight: 500; color: var(--text); }
+.checks input:focus-visible + .box { outline: 2px solid var(--color-accent-solid); outline-offset: 2px; }
+.checks .group { margin-top: var(--space-5); font-size: var(--text-xs); letter-spacing: 0.01em; color: var(--color-text-faint); }
+.sources { font-size: var(--text-sm); color: var(--color-text-muted); max-width: 70ch; }
+.sources ul { margin-top: var(--space-3); padding-left: var(--space-5); display: grid; gap: var(--space-2); }
+.sources h2 { font-size: var(--text-lg); color: var(--color-text); }
 
-/* How to decide */
-.principles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); margin-top: var(--sp-5); }
-.principles article { background: var(--s1); border-radius: var(--r-card); padding: var(--sp-4); }
-.principles h3 { font-size: 16px; font-weight: 500; }
-.principles p { margin-top: var(--sp-1); font-size: 14px; color: var(--text-muted); }
-@media (max-width: 700px) { .principles { grid-template-columns: 1fr; } }
-
-/* Press, drag and throw */
-.press-log { font-size: 13px; color: var(--text-muted); min-width: 64px; }
+/* Press, drag and throw. Inner pieces sit 4px in, so their radius is the card radius minus 4px */
+.press-log { font-size: var(--text-sm); color: var(--color-text-muted); min-width: 4rem; }
 .btn.late { transition-delay: 180ms; }
-.drag-track, .flick-track { position: relative; height: 72px; border-radius: var(--r-card); background: var(--s2); overflow: hidden; touch-action: none; }
-.drag-card, .flick-card { position: absolute; top: 12px; left: 12px; width: 88px; height: 48px; border-radius: var(--r-card); background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-size: 13px; font-weight: 500; cursor: grab; user-select: none; touch-action: none; }
-.flick-card { width: 96px; }
+.drag-track, .flick-track { position: relative; height: 3.5rem; border-radius: var(--radius-card); background: var(--color-fill); overflow: hidden; touch-action: none; }
+.drag-card, .flick-card { position: absolute; top: var(--space-1); left: var(--space-1); width: 5.5rem; height: 3rem; border-radius: var(--radius-small); background: var(--color-accent-solid); color: var(--color-accent-ink); display: grid; place-items: center; font-size: var(--text-sm); font-weight: var(--weight-medium); cursor: grab; user-select: none; touch-action: none; }
+.flick-card { width: 6rem; }
 .drag-card:active, .flick-card:active { cursor: grabbing; }
-.drag-card:focus-visible, .flick-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-.readout { margin-top: var(--sp-2); display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); }
-.readout .mono { color: var(--text); }
+.drag-card:focus-visible, .flick-card:focus-visible { outline: 2px solid var(--color-accent-solid); outline-offset: 3px; }
+.readout { margin-top: var(--space-2); display: flex; justify-content: space-between; color: var(--color-text-muted); }
+.readout .mono { color: var(--color-text); }
 
-/* Undo and message */
-.undo { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); font-size: 14px; }
-.undo-msg { margin-top: var(--sp-3); min-height: 24px; display: flex; align-items: center; gap: var(--sp-3); font-size: 13px; color: var(--text-muted); }
-.undo-msg .btn { height: 24px; padding: 0 var(--sp-3); font-size: 13px; }
-.field-err { font-size: 13px; color: var(--danger); }
-[hidden] { display: none !important; }
+/* Undo */
+.undo { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.undo-msg { margin-top: var(--space-3); min-height: var(--control-height-sm); display: flex; align-items: center; gap: var(--space-3); color: var(--color-text-muted); }
+.undo-msg .btn { height: var(--control-height-sm); padding: 0 var(--space-3); }
 
 /* Type per size */
-.type-demo h4 { font-size: 32px; line-height: 1.05; letter-spacing: -0.02em; font-weight: 500; }
-.type-demo p { margin-top: var(--sp-2); font-size: 15px; line-height: 1.55; color: var(--text-muted); }
+.type-demo h4 { font-size: var(--text-xl); line-height: 1.05; letter-spacing: -0.02em; }
+.type-demo p { margin-top: var(--space-2); font-size: var(--text-md); line-height: 1.55; color: var(--color-text-muted); }
 .type-demo.bad h4 { line-height: 1.55; letter-spacing: 0.02em; }
 .type-demo.bad p { line-height: 1.05; letter-spacing: -0.04em; }
 
 /* Springs and paths */
-.spring-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
-@media (max-width: 560px) { .spring-row { grid-template-columns: 1fr; } }
-.spring-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-faint); margin-bottom: var(--sp-2); }
-.spring-lane { position: relative; height: 44px; border-radius: var(--r-card); background: var(--s2); overflow: hidden; }
-.spring-box { position: absolute; top: 6px; left: 6px; width: 32px; height: 32px; border-radius: 8px; background: var(--accent); }
-.spring-box.bounce { background: var(--text); }
-.paths { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
-@media (max-width: 560px) { .paths { grid-template-columns: 1fr; } }
-.lane { position: relative; height: 104px; border-radius: var(--r-card); background: var(--s2); overflow: hidden; }
-.path-panel { position: absolute; top: 12px; left: 12px; width: 72px; height: 80px; border-radius: var(--r-card); background: var(--s1); box-shadow: var(--shadow-float); transform: translateX(160%); opacity: 0; transition: transform var(--t-normal) var(--ease-out), opacity var(--t-normal) var(--ease-out); }
+.spring-row, .paths { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+@media (max-width: 35rem) { .spring-row, .paths { grid-template-columns: 1fr; } }
+.spring-label { display: flex; justify-content: space-between; font-size: var(--text-xs); color: var(--color-text-faint); margin-bottom: var(--space-2); }
+.spring-lane { position: relative; height: 2.5rem; border-radius: var(--radius-card); background: var(--color-fill); overflow: hidden; }
+.spring-box { position: absolute; top: var(--space-1); left: var(--space-1); width: 2rem; height: 2rem; border-radius: var(--radius-small); background: var(--color-accent-solid); }
+.spring-box.bounce { background: var(--color-text); }
+.lane { position: relative; height: 6.5rem; border-radius: var(--radius-card); background: var(--color-fill); overflow: hidden; }
+.path-panel { position: absolute; top: var(--space-1); left: var(--space-1); bottom: var(--space-1); width: 4.5rem; border-radius: var(--radius-small); background: var(--color-surface); box-shadow: var(--shadow-float); transform: translateX(160%); opacity: 0; transition: transform var(--t-normal) var(--ease-out), opacity var(--t-normal) var(--ease-out); }
 .path-panel.in { transform: none; opacity: 1; }
 .path-panel.out-x { transform: translateX(160%); opacity: 0; }
 .path-panel.out-y { transform: translateY(160%); opacity: 0; }
-.path-panel.reset { transition: none !important; }
-.lane-cap { margin-top: var(--sp-2); font-size: 12px; color: var(--text-faint); }
+.lane-cap { margin-top: var(--space-2); font-size: var(--text-xs); color: var(--color-text-faint); }
 body[data-reduced] .path-panel { transform: none !important; }
 @media (prefers-reduced-motion: reduce) { .path-panel { transform: none !important; } }
 
-/* Wayfinding */
-.mini-bar { display: flex; align-items: center; gap: var(--sp-2); }
-.mini-bar .btn.icon { width: 28px; height: 28px; }
-h2, h3, h4 { text-wrap: balance; }
-.p .text > p, .lede, .note { text-wrap: pretty; }
+/* Small specimens */
+.mini-bar { display: flex; align-items: center; gap: var(--space-2); }
+.dead-end { display: grid; place-items: center; min-height: 8rem; }
+.beside { display: grid; grid-template-columns: minmax(0, 1fr) 4rem; gap: var(--space-2); height: 6rem; }
+.beside > * { border-radius: var(--radius-small); background: var(--color-fill); }
+.beside > :first-child { background: var(--color-fill-strong); }
+.swapped { height: 6rem; display: grid; place-items: center; border-radius: var(--radius-small); background: var(--color-fill); }
 .theme-switching *, .theme-switching *::before, .theme-switching *::after { transition: none !important; }
-.stack-pairs { display: grid; gap: var(--sp-4); }
-.play { width: 48px; height: 48px; border-radius: 50%; background: var(--s2); display: grid; place-items: center; }
-.play svg { width: 16px; height: 16px; fill: var(--text); }
+.play { width: 3rem; height: 3rem; border-radius: 50%; background: var(--color-fill); display: grid; place-items: center; }
+.play svg { width: var(--icon-size); height: var(--icon-size); fill: var(--color-text); }
 .play.optical svg { transform: translateX(2px); }
-.ibtn { display: inline-flex; align-items: center; gap: var(--sp-2); padding: 0 var(--sp-4) 0 var(--sp-3); }
-.ibtn.even { padding: 0 var(--sp-4); }
-.nest { background: var(--s2); border-radius: var(--r-float); padding: var(--sp-2); }
-.nest > div { background: var(--s3); height: 64px; border-radius: calc(var(--r-float) - var(--sp-2)); }
-.nest.bad > div { border-radius: var(--r-float); }
-.img { aspect-ratio: 4 / 3; border-radius: var(--r-card); background: var(--s1); display: grid; place-items: center; }
-.img i { width: 36%; aspect-ratio: 1; border-radius: 50%; background: var(--s3); }
-.img.edge { outline: 1px solid rgb(0 0 0 / 0.08); outline-offset: -1px; }
-@media (prefers-color-scheme: dark) { .img.edge { outline-color: rgb(255 255 255 / 0.08); } }
-.pal { display: flex; align-items: center; justify-content: space-between; padding: var(--sp-3); border-radius: var(--r-card); font-size: 14px; }
-.pal + .pal { margin-top: var(--sp-2); }
-.pal i { width: 16px; height: 16px; border-radius: 50%; }
-.ell { display: block; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
-.hits { display: flex; gap: var(--sp-5); align-items: flex-end; flex-wrap: wrap; }
-.hits > div { display: grid; gap: var(--sp-2); justify-items: start; }
-.hit { width: var(--h); height: var(--h); border-radius: var(--r-card); background: var(--s2); display: grid; place-items: center; }
-.swap { position: relative; width: 16px; height: 16px; flex: none; }
+.ibtn { display: inline-flex; align-items: center; gap: var(--space-2); padding: 0 var(--space-4) 0 var(--space-3); }
+.ibtn.even { padding: 0 var(--space-4); }
+.nest { background: var(--color-fill); border-radius: var(--radius-float); padding: var(--space-2); }
+.nest > div { background: var(--color-fill-strong); height: 4rem; border-radius: calc(var(--radius-float) - var(--space-2)); }
+.nest.bad > div { border-radius: var(--radius-float); }
+.panel { background: var(--color-float); border-radius: var(--radius-float); box-shadow: var(--shadow-float), 0 0 0 1px var(--color-edge); padding: var(--space-3); display: grid; gap: var(--space-3); }
+.panel .card { background: var(--color-fill); border-radius: calc(var(--radius-float) - var(--space-3)); padding: var(--space-3); }
+.panel.bad .card { border-radius: var(--radius-card); }
+.panel.bad .card .card { background: var(--color-fill-strong); }
+.img { aspect-ratio: 4 / 3; border-radius: var(--radius-card); background: var(--color-surface); display: grid; place-items: center; }
+.img.on-fill { background: var(--color-fill); }
+.img i { width: 36%; aspect-ratio: 1; border-radius: 50%; background: var(--color-fill-strong); }
+.img.edge { outline: 1px solid var(--color-image-edge); outline-offset: -1px; }
+.pal { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3); border-radius: var(--radius-card); }
+.pal + .pal { margin-top: var(--space-2); }
+.pal i { width: var(--icon-size); height: var(--icon-size); border-radius: 50%; }
+.ell { display: block; max-width: 11.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hits { display: flex; gap: var(--space-5); align-items: flex-end; flex-wrap: wrap; }
+.hits > div { display: grid; gap: var(--space-2); justify-items: start; }
+.hit { width: var(--h); height: var(--h); border-radius: var(--radius-small); background: var(--color-fill); display: grid; place-items: center; }
+.swap { position: relative; width: var(--icon-size); height: var(--icon-size); flex: none; }
 .swap .ico { position: absolute; inset: 0; transition: opacity var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out), filter var(--t-fast) var(--ease-out); }
-.swap .ico.out { opacity: 0; transform: scale(0.25); filter: blur(4px); }
-.xcard { height: 48px; margin-bottom: var(--sp-3); border-radius: var(--r-card); background: var(--s2); display: grid; place-items: center; font-size: 14px; opacity: 0; transform: translateY(4px); filter: blur(4px); visibility: hidden; transition: opacity var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out), filter var(--t-fast) var(--ease-out), visibility 0s linear var(--t-fast); }
+.swap .ico.out { opacity: 0; transform: scale(0.25); filter: blur(var(--exit-blur)); }
+.xcard { height: 3rem; margin-bottom: var(--space-3); border-radius: var(--radius-card); background: var(--color-fill); display: grid; place-items: center; opacity: 0; transform: translateY(4px); filter: blur(var(--exit-blur)); visibility: hidden; transition: opacity var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out), filter var(--t-fast) var(--ease-out), visibility 0s linear var(--t-fast); }
 .xcard.open { opacity: 1; transform: none; filter: none; visibility: visible; transition: opacity var(--t-normal) var(--ease-out), transform var(--t-normal) var(--ease-out), filter 0s, visibility 0s; }
-.stag { display: grid; gap: var(--sp-2); }
-.stag .rp { height: 12px; border-radius: 6px; background: var(--s3); opacity: 0; transform: translateY(6px); transition: opacity var(--t-normal) var(--ease-out), transform var(--t-normal) var(--ease-out); transition-delay: calc(var(--g) * var(--stagger) * var(--slow)); }
+.stag { display: grid; gap: var(--space-2); }
+.stag .rp { height: var(--space-3); border-radius: var(--radius-pill); background: var(--color-fill-strong); opacity: 0; transform: translateY(6px); transition: opacity var(--t-normal) var(--ease-out), transform var(--t-normal) var(--ease-out); transition-delay: calc(var(--g) * var(--stagger) * var(--slow)); }
 .stag .rp.go { opacity: 1; transform: none; }
 body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced] .stag .rp { transform: none; filter: none; }
 @media (prefers-reduced-motion: reduce) { .swap .ico.out, .xcard, .stag .rp { transform: none; filter: none; } }
 </style>
 </head>
 <body data-layer="core">
+<a class="skip" href="#main">Skip to the principles</a>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></symbol>
@@ -356,12 +393,13 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
   <symbol id="i-copy" viewBox="0 0 16 16"><rect x="5" y="5" width="8.5" height="8.5" rx="1.5"/><path d="M10.5 5V3.5A1.5 1.5 0 0 0 9 2H3.5A1.5 1.5 0 0 0 2 3.5V9a1.5 1.5 0 0 0 1.5 1.5H5"/></symbol>
   <symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></symbol>
   <symbol id="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11L13 8z" stroke="none"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5M8 11h.01"/></symbol>
   <symbol id="i-back" viewBox="0 0 16 16"><path d="M9.5 3.5L5 8l4.5 4.5"/></symbol>
 </svg>
 
 <div class="shell">
   <aside class="side">
-    <h1>Design and motion principles</h1>
+    <a class="home" href="#main">Design and motion principles</a>
     <div class="seg" role="radiogroup" aria-label="Principle layers">
       <button type="button" role="radio" aria-checked="true" data-layer-btn="core">Core</button>
       <button type="button" role="radio" aria-checked="false" data-layer-btn="editor">+ Editor</button>
@@ -380,14 +418,15 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
       <a href="#build">Build notes</a>
     </nav>
     <div class="files">
-      <a href="principles.md">principles.md</a>
-      <a href="principles-editor.md">principles-editor.md</a>
+      <span class="c-faint">Markdown source</span>
+      <a href="principles.md">Core principles</a>
+      <a href="principles-editor.md">Editor principles</a>
     </div>
   </aside>
 
-  <main>
+  <main id="main">
     <header class="hero">
-      <h2>Design and motion principles</h2>
+      <h1>Design and motion principles</h1>
       <p>How an interface looks, reads, behaves and moves. Eight principles decide what to build; the rules below say how. The Do specimens on this page follow them. Switch on the editor layer to add the rules for editors and workspaces.</p>
     </header>
 
@@ -395,7 +434,7 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
     <section id="decide">
       <h2>How to decide</h2>
       <p class="lede">When two rules pull against each other, these eight break the tie. They decide what to build as much as how it looks.</p>
-      <div class="principles">
+      <div class="cards">
         <article><h3>Purpose</h3><p>Every feature asks for people’s time, attention and trust. Spend that budget only where it pays, and decide what not to build.</p></article>
         <article><h3>Agency</h3><p>Offer choices, keep a way back, and make undo the safety net. Confirm only what is costly and can’t be undone.</p></article>
         <article><h3>Responsibility</h3><p>Ask for private data only when it’s needed, only for what’s needed, and say what happens to it. Anticipate how the product could mislead or harm.</p></article>
@@ -437,9 +476,9 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
             <span>Email notifications</span><button class="sw" role="switch" aria-checked="true" aria-label="Email notifications"></button>
           </div></div></figure>
           <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body">
-            <div class="btns" style="justify-content:flex-end"><button class="sw" role="switch" aria-checked="true" aria-label="Notifications"></button></div>
-            <div class="space-between" style="margin-top:var(--sp-6)"><span>Email notifications</span><span class="c-faint">On</span></div>
-            <div class="space-between" style="margin-top:var(--sp-3)"><span>Default view</span><span class="c-muted">List</span></div>
+            <div class="btns end"><button class="sw" role="switch" aria-checked="true" aria-label="Notifications"></button></div>
+            <div class="space-between mt-6"><span>Email notifications</span><span class="c-faint">On</span></div>
+            <div class="space-between mt-3"><span>Default view</span><span class="c-muted">List</span></div>
           </div></figure>
         </div>
       </article>
@@ -462,8 +501,8 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
           </div></div></figure>
         </div>
         <div class="pair">
-          <figure class="ex"><figcaption>Do: centred by eye</figcaption><div class="ex-body"><div class="btns" style="gap:var(--sp-4)"><span class="play optical"><svg><use href="#i-play"/></svg></span><button class="btn ibtn"><svg class="ico"><use href="#i-plus"/></svg>Add file</button></div></div></figure>
-          <figure class="ex"><figcaption>Avoid: centred by the numbers</figcaption><div class="ex-body"><div class="btns" style="gap:var(--sp-4)"><span class="play"><svg><use href="#i-play"/></svg></span><button class="btn ibtn even"><svg class="ico"><use href="#i-plus"/></svg>Add file</button></div></div></figure>
+          <figure class="ex"><figcaption>Do: centred by eye</figcaption><div class="ex-body"><div class="btns gap-4"><span class="play optical"><svg><use href="#i-play"/></svg></span><button class="btn ibtn"><svg class="ico"><use href="#i-plus"/></svg>Add file</button></div></div></figure>
+          <figure class="ex"><figcaption>Avoid: centred by the numbers</figcaption><div class="ex-body"><div class="btns gap-4"><span class="play"><svg><use href="#i-play"/></svg></span><button class="btn ibtn even"><svg class="ico"><use href="#i-plus"/></svg>Add file</button></div></div></figure>
         </div></div>
       </article>
 
@@ -501,10 +540,10 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
         </div>
         <div class="pair">
           <figure class="ex"><figcaption>Do</figcaption><div class="ex-body">
-            <div style="display:grid;grid-template-columns:1fr 64px;gap:var(--sp-2);height:96px"><div class="bar" style="height:100%;width:auto"></div><div style="background:var(--s2);border-radius:var(--r-card)"></div></div>
+            <div class="beside" role="img" aria-label="The page stays put with a tray beside it"><div></div><div></div></div>
           </div></figure>
           <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body">
-            <div style="background:var(--s2);border-radius:var(--r-card);height:96px;display:grid;place-items:center;font-size:12px;color:var(--text-faint)">Whole screen replaced</div>
+            <div class="swapped c-faint">Whole screen replaced</div>
           </div></figure>
         </div>
       </article>
@@ -522,7 +561,7 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
             <div class="space-between"><span>Y</span><span class="mono">64.50</span></div>
             <div class="space-between"><span>Rotation</span><span class="mono">0.00</span></div>
           </div></div></figure>
-          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="stack-do" style="gap:var(--sp-4)">
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="stack-do gap-4">
             <div class="space-between"><span>X</span><span class="mono">128.00</span></div>
             <div class="space-between"><span>Opacity</span><span class="mono">80</span></div>
             <div class="space-between"><span>Rotation</span><span class="mono">0.00</span></div>
@@ -551,8 +590,8 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
         </div>
         <div class="pair">
           <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp">
-            <div style="font-size:15px;font-weight:500">Team plan</div><div class="c-muted" style="font-size:14px">Three seats, billed monthly</div>
-            <div class="btns" style="margin-top:var(--sp-2)"><button class="btn primary">Add seat</button></div>
+            <div class="t-strong">Team plan</div><div class="c-muted">Three seats, billed monthly</div>
+            <div class="btns mt-2"><button class="btn primary">Add seat</button></div>
           </div></div></figure>
           <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp">
             <div style="background:#f59e0b;color:#000;border-radius:6px;padding:6px 10px;font-size:13px">Limited offer</div>
@@ -568,14 +607,14 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
           <p>The accent is the brand colour. It marks what’s selected, switched on, or the main action. Call it accent, never primary. One primary button per view. Text on the accent uses its own ink colour, never grey.</p>
         </div>
         <div class="pair">
-          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-4)">
-            <div class="btns"><button class="btn is-selected" style="height:28px">Week</button><button class="btn" style="height:28px">Month</button></div>
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp gap-4">
+            <div class="btns"><button class="btn is-selected btn-sm">Week</button><button class="btn btn-sm">Month</button></div>
             <div class="tog"><button class="sw" role="switch" aria-checked="true" aria-labelledby="l-notify"></button><span id="l-notify">Notify me</span></div>
             <div class="btns"><button class="btn primary">Save draft</button><button class="btn">Cancel</button></div>
           </div></div></figure>
-          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-3)">
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp gap-3">
             <div class="btns"><button class="btn primary">Save</button><button class="btn primary">Publish</button><button class="btn primary">Share</button></div>
-            <div style="color:var(--accent);font-size:14px">Everything is a link now</div>
+            <div style="color:var(--color-accent-solid);font-size:14px">Everything is a link now</div>
           </div></div></figure>
         </div>
       </article>
@@ -587,10 +626,10 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
         </div>
         <div class="pair">
           <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp">
-            <div class="c-read">Quarterly report</div><div class="c-muted" style="font-size:14px">Updated by Sam on Tuesday</div><div class="c-faint">3 comments</div>
+            <div class="c-read">Quarterly report</div><div class="c-muted">Updated by Sam on Tuesday</div><div class="c-faint">3 comments</div>
           </div></div></figure>
           <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp">
-            <div>Quarterly report</div><div style="color:color-mix(in srgb, var(--text) 75%, var(--s1));font-size:14px">Updated by Sam on Tuesday</div><div style="color:color-mix(in srgb, var(--text) 55%, var(--s1));font-size:13px">3 comments</div><div style="color:color-mix(in srgb, var(--text) 40%, var(--s1));font-size:12px">Draft</div>
+            <div>Quarterly report</div><div style="color:color-mix(in srgb, var(--color-text) 75%, var(--color-surface));font-size:14px">Updated by Sam on Tuesday</div><div style="color:color-mix(in srgb, var(--color-text) 55%, var(--color-surface));font-size:13px">3 comments</div><div style="color:color-mix(in srgb, var(--color-text) 40%, var(--color-surface));font-size:12px">Draft</div>
           </div></div></figure>
         </div>
       </article>
@@ -602,10 +641,10 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
         </div>
         <div class="pair">
           <figure class="ex"><figcaption>Do</figcaption><div class="ex-body">
-            <div class="rows pick"><div class="row" style="grid-template-columns:1fr"><span>Rename</span></div><div class="row sel" style="grid-template-columns:1fr"><span>Duplicate</span></div></div>
-            <div class="float" style="margin-top:var(--sp-3)"><div class="item">Move to folder</div><div class="item sel">Archive</div></div>
+            <div class="rows pick"><div class="row row-plain"><span>Rename</span></div><div class="row sel row-plain"><span>Duplicate</span></div></div>
+            <div class="float mt-3"><div class="item">Move to folder</div><div class="item sel">Archive</div></div>
           </div></figure>
-          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body" style="padding:var(--sp-4)">
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body">
             <div style="box-shadow:0 4px 12px rgba(0,0,0,.2);border-radius:8px;padding:8px 12px;font-size:14px;margin-bottom:8px">Rename</div>
             <div style="box-shadow:0 4px 12px rgba(0,0,0,.2);border-radius:8px;padding:8px 12px;font-size:14px;border-bottom:1px solid #8884">Duplicate</div>
           </div></figure>
@@ -618,8 +657,8 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
           <p>No glows, glass, blurred blobs, gradient text or emoji. A gradient is allowed only as a small tone shift inside one colour, never from one hue to another.</p>
         </div>
         <div class="pair">
-          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-3)"><div style="font-size:20px;font-weight:500">Welcome back</div><div class="btns"><button class="btn primary">Open project</button></div></div></div></figure>
-          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-3)"><div style="font-size:20px;font-weight:500;background:linear-gradient(90deg,#ec4899,#06b6d4);-webkit-background-clip:text;background-clip:text;color:transparent">Welcome back ✨</div><div class="btns"><button class="btn" style="background:#8b5cf6;color:#fff;box-shadow:0 0 18px #8b5cf6">Open project</button></div></div></div></figure>
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp gap-3"><div class="t-title">Welcome back</div><div class="btns"><button class="btn primary">Open project</button></div></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp gap-3"><div style="font-size:20px;font-weight:500;background:linear-gradient(90deg,#ec4899,#06b6d4);-webkit-background-clip:text;background-clip:text;color:transparent">Welcome back ✨</div><div class="btns"><button class="btn" style="background:#8b5cf6;color:#fff;box-shadow:0 0 18px #8b5cf6">Open project</button></div></div></div></figure>
         </div>
       </article>
 
@@ -651,8 +690,8 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
           <p>Colours, radii, spacing, durations and easings come from one set of tokens, named for their job, never for their value. Every step in a scale has a use. If a token is wrong, change the token.</p>
         </div>
         <div class="pair">
-          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><pre>padding: var(--sp-4);
-border-radius: var(--r-card);
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><pre>padding: var(--space-4);
+border-radius: var(--radius-card);
 color: var(--color-text-muted);</pre></div></figure>
           <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><pre>padding: 13px;
 border-radius: 9px;
@@ -683,9 +722,9 @@ color: var(--gray-500);</pre></div></figure>
           <h3>Panels stay quiet</h3>
           <p>Panels use neutral surfaces with one accent. If a panel draws the eye away from the main content, it is too loud.</p>
         </div>
-        <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-3)">
+        <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp gap-3">
           <div class="c-faint">Fill</div>
-          <div class="space-between"><span>Colour</span><span class="swatches"><i style="background:var(--accent)"></i></span></div>
+          <div class="space-between"><span>Colour</span><span class="swatches"><i style="background:var(--color-accent-solid)"></i></span></div>
           <div class="space-between"><span>Opacity</span><span class="mono">80</span></div>
         </div></div></figure>
       </article>
@@ -697,15 +736,15 @@ color: var(--gray-500);</pre></div></figure>
           <p>One radius for floating panels, a smaller one for cards inside them, pills for controls. The card’s radius is the panel’s radius minus the padding, so the corners stay concentric. No card inside a card.</p>
         </div>
         <div class="pair">
-          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body" style="padding:0;background:none">
-            <div class="float" style="border-radius:var(--r-float);padding:var(--sp-3);display:grid;gap:var(--sp-3)">
-              <div style="background:var(--s2);border-radius:calc(var(--r-float) - var(--sp-3));padding:var(--sp-3);font-size:14px">Card</div>
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body bare">
+            <div class="panel">
+              <div class="card">Card</div>
               <div class="btns"><button class="btn">Pill control</button></div>
             </div>
           </div></figure>
-          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body" style="padding:0;background:none">
-            <div class="float" style="border-radius:var(--r-float);padding:var(--sp-3)">
-              <div style="background:var(--s2);border-radius:var(--r-card);padding:var(--sp-3)"><div style="background:var(--s3);border-radius:var(--r-card);padding:var(--sp-3);font-size:14px">Card in a card</div></div>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body bare">
+            <div class="panel bad">
+              <div class="card"><div class="card">Card in a card</div></div>
             </div>
           </div></figure>
         </div>
@@ -722,7 +761,7 @@ color: var(--gray-500);</pre></div></figure>
           <p>A sans for everything you read. A mono only for codes and values you compare. Timers, prices and tables use tabular figures so they don’t shift.</p>
         </div>
         <div class="pair">
-          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp"><div style="font-size:20px;font-weight:500">Order shipped</div><div class="c-muted" style="font-size:14px">Tracking <span class="mono">1Z 84A 7F2</span></div></div></div></figure>
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp"><div class="t-title">Order shipped</div><div class="c-muted">Tracking <span class="mono">1Z 84A 7F2</span></div></div></div></figure>
           <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp"><div style="font-family:Georgia,serif;font-style:italic;font-size:22px">Order shipped</div><div style="font-family:var(--font-mono);font-size:13px" class="c-muted">Your order is on its way</div></div></div></figure>
         </div>
       </article>
@@ -733,8 +772,8 @@ color: var(--gray-500);</pre></div></figure>
           <p>Reach for a bigger size or a stronger text role before a heavier weight. No italic emphasis, no negative letter spacing on small text, sentence case everywhere.</p>
         </div>
         <div class="pair">
-          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-1)"><div style="font-size:20px;font-weight:500">Billing</div><div class="c-muted" style="font-size:14px">Invoices from the last year</div><div class="c-faint">12 invoices</div></div></div></figure>
-          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-1)"><div style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase">Billing</div><div style="font-size:14px;font-weight:700">Invoices from the <em>last</em> year</div><div style="font-size:12px;font-weight:700;letter-spacing:-.04em">12 invoices</div></div></div></figure>
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp gap-1"><div class="t-title">Billing</div><div class="c-muted">Invoices from the last year</div><div class="c-faint">12 invoices</div></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp gap-1"><div style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase">Billing</div><div style="font-size:14px;font-weight:700">Invoices from the <em>last</em> year</div><div style="font-size:12px;font-weight:700;letter-spacing:-.04em">12 invoices</div></div></div></figure>
         </div>
       </article>
 
@@ -761,8 +800,8 @@ color: var(--gray-500);</pre></div></figure>
           <p>“Colours” is enough. Drop helper lines and readouts nobody acts on. No trailing periods or exclamation marks. Placeholders are short. A toggle says what happens when it’s on, and a link says where it goes.</p>
         </div>
         <div class="pair">
-          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="field"><label for="f1">Colours</label><div class="swatches"><i style="background:var(--accent)"></i><i style="background:var(--text)"></i><i style="background:var(--text-faint)"></i></div></div><div class="field" style="margin-top:var(--sp-3)"><input id="f1" class="input" placeholder="Search" aria-label="Search"></div></div></figure>
-          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="field"><label style="font-size:14px;color:var(--text)">Pick a colour below!</label><div class="swatches"><i style="background:var(--accent)"></i><i style="background:var(--text)"></i><i style="background:var(--text-faint)"></i></div><div class="c-faint">Selected: blue</div></div><div class="field" style="margin-top:var(--sp-3)"><input class="input" placeholder="Type here to search for something..." aria-label="Search"></div></div></figure>
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="field"><span class="c-muted">Colours</span><div class="swatches" role="img" aria-label="Blue, black and grey"><i style="background:var(--color-accent-solid)"></i><i style="background:var(--color-text)"></i><i style="background:var(--color-text-faint)"></i></div></div><div class="field mt-3"><label for="f1">Files</label><input id="f1" class="input" type="search" placeholder="Search"></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="field"><label style="font-size:14px;color:var(--color-text)">Pick a colour below!</label><div class="swatches"><i style="background:var(--color-accent-solid)"></i><i style="background:var(--color-text)"></i><i style="background:var(--color-text-faint)"></i></div><div class="c-faint">Selected: blue</div></div><div class="field mt-3"><input class="input" placeholder="Type here to search for something..." aria-label="Search"></div></div></figure>
         </div>
       </article>
 
@@ -772,8 +811,8 @@ color: var(--gray-500);</pre></div></figure>
           <p>Verb plus object. No “Get started” or “Learn more”, no marketing words like seamless, supercharge, elevate or unlock, and no made-up numbers. A confirmation repeats the action, like “Delete project” beside “Cancel”, and a flow uses one label for every next step.</p>
         </div>
         <div class="pair">
-          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="btns" style="flex-direction:column;align-items:flex-start"><button class="btn">Save draft</button><button class="btn">Send invite</button><button class="btn">Download report</button></div></div></figure>
-          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="btns" style="flex-direction:column;align-items:flex-start"><button class="btn">Get started</button><button class="btn">Learn more</button><button class="btn">Unlock the magic!</button></div></div></figure>
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="btns col"><button class="btn">Save draft</button><button class="btn">Send invite</button><button class="btn">Download report</button></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="btns col"><button class="btn">Get started</button><button class="btn">Learn more</button><button class="btn">Unlock the magic!</button></div></div></figure>
         </div>
       </article>
 
@@ -783,8 +822,8 @@ color: var(--gray-500);</pre></div></figure>
           <p>Address people as “you”, never “the user”.</p>
         </div>
         <div class="pair">
-          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><p style="font-size:14px">You have 3 drafts</p></div></figure>
-          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><p style="font-size:14px">The user has 3 drafts</p></div></figure>
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><p>You have 3 drafts</p></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><p>The user has 3 drafts</p></div></figure>
         </div>
       </article>
 
@@ -794,8 +833,8 @@ color: var(--gray-500);</pre></div></figure>
           <p>Curly quotes, an en dash for ranges, an em dash for asides, and the ellipsis character instead of three dots. Write in normal case and let styling change it.</p>
         </div>
         <div class="pair">
-          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp" style="font-size:14px"><span>“Q4 plan” is ready</span><span>2–4 weeks</span><span>Saving…</span></div></div></figure>
-          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp" style="font-size:14px"><span>"Q4 plan" is ready</span><span>2-4 weeks</span><span>Saving...</span></div></div></figure>
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp"><span>“Q4 plan” is ready</span><span>2–4 weeks</span><span>Saving…</span></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp"><span>"Q4 plan" is ready</span><span>2-4 weeks</span><span>Saving...</span></div></div></figure>
         </div>
       </article>
 
@@ -821,7 +860,7 @@ color: var(--gray-500);</pre></div></figure>
             <div class="row"><svg class="ico"><use href="#i-search"/></svg><span>Search</span><span></span></div>
             <div class="row"><svg class="ico"><use href="#i-trash"/></svg><span>Delete</span><span></span></div>
           </div>
-          <div style="margin-top:var(--sp-5)"><span class="tipwrap"><button class="btn icon" aria-label="Download"><svg class="ico"><use href="#i-download"/></svg></button><span class="tip" role="tooltip">Download</span></span></div>
+          <div class="mt-5"><span class="tipwrap"><button class="btn icon" aria-label="Download"><svg class="ico"><use href="#i-download"/></svg></button><span class="tip" role="tooltip">Download</span></span></div>
           <p class="note">Hover or focus the icon button to see its tooltip.</p>
         </div></figure>
       </article>
@@ -834,9 +873,9 @@ color: var(--gray-500);</pre></div></figure>
         </div>
         <div class="pair">
           <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp">
-            <div class="space-between"><span>Width</span><span class="mono" style="font-variant-numeric:tabular-nums">128.00</span></div>
-            <div class="space-between"><span>Height</span><span class="mono" style="font-variant-numeric:tabular-nums">64.50</span></div>
-            <div class="space-between"><span>Radius</span><span class="mono" style="font-variant-numeric:tabular-nums">0.25</span></div>
+            <div class="space-between"><span>Width</span><span class="mono">128.00</span></div>
+            <div class="space-between"><span>Height</span><span class="mono">64.50</span></div>
+            <div class="space-between"><span>Radius</span><span class="mono">0.25</span></div>
           </div></div></figure>
           <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp">
             <div class="space-between"><span>Width</span><span>128</span></div>
@@ -853,8 +892,8 @@ color: var(--gray-500);</pre></div></figure>
           <p>A value shown in a panel is one someone acts on. “Opacity” next to a slider is enough.</p>
         </div>
         <div class="pair">
-          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-4)"><div class="space-between"><span>Opacity</span><span class="mono">80</span></div><div class="slider"></div></div></div></figure>
-          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-3)"><div class="space-between"><span>Current opacity value:</span><span class="mono">80%</span></div><div class="slider"></div><div class="c-faint">Drag to change</div></div></div></figure>
+          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp gap-4"><div class="space-between"><span>Opacity</span><span class="mono">80</span></div><div class="slider"></div></div></div></figure>
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><div class="grp gap-3"><div class="space-between"><span>Current opacity value:</span><span class="mono">80%</span></div><div class="slider"></div><div class="c-faint">Drag to change</div></div></div></figure>
         </div>
       </article>
 
@@ -864,9 +903,9 @@ color: var(--gray-500);</pre></div></figure>
           <h3>Panel words are short</h3>
           <p>Labels name things, buttons are verb plus object, and placeholders are a word or two.</p>
         </div>
-        <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp" style="gap:var(--sp-3)">
-          <div class="c-faint">Layers</div>
-          <input class="input" placeholder="Search layers" aria-label="Search layers">
+        <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><div class="grp gap-3">
+          <label class="c-faint" for="layer-search">Layers</label>
+          <input id="layer-search" class="input" type="search" placeholder="Search layers">
           <div class="btns"><button class="btn">Add layer</button><button class="btn">Export PNG</button></div>
         </div></div></figure>
       </article>
@@ -929,8 +968,8 @@ color: var(--gray-500);</pre></div></figure>
           <p>A disabled control gets a short tooltip with the reason and the way out. A form’s submit button is the exception: it stays enabled, and the form is checked when it’s sent.</p>
         </div>
         <figure class="ex"><figcaption>Do</figcaption><div class="ex-body">
-          <div class="tip" style="position:static">Add a title to publish</div><br>
-          <button class="btn" disabled>Publish post</button>
+          <div class="grp"><div class="tip static" id="publish-why">Add a title to publish</div>
+          <span><button class="btn" disabled aria-describedby="publish-why">Publish post</button></span></div>
         </div></figure>
       </article>
 
@@ -942,11 +981,11 @@ color: var(--gray-500);</pre></div></figure>
         <div class="pair">
           <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><pre>@media (hover: hover) {
   .btn:hover {
-    background: var(--s3);
+    background: var(--color-fill-strong);
   }
 }</pre></div></figure>
           <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><pre><span class="no">.btn:hover {
-  background: var(--s3);
+  background: var(--color-fill-strong);
 }</span></pre></div></figure>
         </div>
       </article>
@@ -972,12 +1011,12 @@ color: var(--gray-500);</pre></div></figure>
             <div class="field">
               <label for="email">Email</label>
               <input id="email" class="input" value="sam@" aria-invalid="true" aria-describedby="email-err">
-              <span class="field-err" id="email-err">Enter an email like name@company.com</span>
+              <span class="field-err" id="email-err"><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg>Enter an email like name@company.com</span>
             </div>
             <p class="note">The message sits under the field and clears when it’s fixed.</p>
           </div></figure>
           <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body">
-            <div class="grp" style="gap:var(--sp-3)">
+            <div class="grp gap-3">
               <div class="c-faint">One or more fields are invalid</div>
               <div class="field"><label for="email2">Email</label><input id="email2" class="input" value="sam@"></div>
               <button class="btn" disabled>Save changes</button>
@@ -995,14 +1034,14 @@ color: var(--gray-500);</pre></div></figure>
           <figure class="ex"><figcaption>Do</figcaption><div class="ex-body">
             <div class="mini-bar">
               <button class="btn icon" aria-label="Back"><svg class="ico"><use href="#i-back"/></svg></button>
-              <span style="font-size:14px;font-weight:500">Billing</span>
+              <span class="t-strong">Billing</span>
             </div>
-            <div class="rows" style="margin-top:var(--sp-3)">
-              <div class="row sel" style="grid-template-columns:1fr"><span>Invoices</span></div>
-              <div class="row" style="grid-template-columns:1fr"><span>Payment method</span></div>
+            <div class="rows mt-3">
+              <div class="row sel row-plain"><span>Invoices</span></div>
+              <div class="row row-plain"><span>Payment method</span></div>
             </div>
           </div></figure>
-          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body" style="height:132px;display:grid;place-items:center">
+          <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body dead-end">
             <button class="btn primary">Continue</button>
           </div></figure>
         </div>
@@ -1036,8 +1075,8 @@ color: var(--gray-500);</pre></div></figure>
         </div>
         <div class="pair">
           <figure class="ex"><figcaption>Do</figcaption><div class="ex-body">
-            <div class="btns" style="padding:var(--sp-1)"><button class="btn is-focus" tabindex="-1">Send invite</button></div>
-            <div style="margin-top:var(--sp-4)"><div class="stat"><span>Text</span><span>4.5:1</span></div><div class="stat"><span>Controls, large text</span><span>3:1</span></div></div>
+            <div class="btns pad-1"><button class="btn is-focus" tabindex="-1">Send invite</button></div>
+            <div class="mt-4"><div class="stat"><span>Text</span><span>4.5:1</span></div><div class="stat"><span>Controls, large text</span><span>3:1</span></div></div>
           </div></figure>
           <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><pre><span class="no">button:focus {
   outline: none;
@@ -1088,7 +1127,13 @@ color: var(--gray-500);</pre></div></figure>
           <p>Keep the submit button enabled. Check the form when it’s sent, mark each invalid field, tie each error to its field, and move focus to the first one.</p>
         </div>
         <div class="pair">
-          <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><button class="btn primary">Save changes</button><p class="note">Errors appear next to their fields after you press it.</p></div></figure>
+          <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body">
+            <form class="grp" id="submit-form" novalidate>
+              <div class="field"><label for="submit-name">Name</label><input id="submit-name" class="input" autocomplete="name"><span class="field-err" id="submit-name-err" hidden><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg>Enter your name</span></div>
+              <div class="field"><label for="submit-email">Email</label><input id="submit-email" class="input" type="email" inputmode="email" autocomplete="email"><span class="field-err" id="submit-email-err" hidden><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg>Enter an email like name@company.com</span></div>
+              <div class="btns mt-2"><button class="btn primary">Save changes</button><span class="press-log" role="status" id="submit-status"></span></div>
+            </form>
+          </div></figure>
           <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><button class="btn" disabled>Save changes</button><p class="note">Nothing says what’s missing.</p></div></figure>
         </div>
       </article>
@@ -1110,7 +1155,7 @@ color: var(--gray-500);</pre></div></figure>
     <section id="slop">
       <h2>Slop to avoid</h2>
       <p class="lede">Things that make an interface look generated. Leave them out and do the plain thing instead.</p>
-      <div class="slop">
+      <div class="cards">
         <div><h3>Tags and badges</h3><p>No “New” or “Beta” pills. Say it in words where it matters, or not at all.</p></div>
         <div><h3>Italic words</h3><p>No italics for emphasis or flavour. A logo can be the exception.</p></div>
         <div><h3>Editorial serifs and negative kerning</h3><p>No serif display type, and no tightened spacing to make headings look designed.</p></div>
@@ -1137,15 +1182,15 @@ color: var(--gray-500);</pre></div></figure>
       <div class="stage" id="stage">
         <div class="stage-main mv">
           <div class="btns">
-            <button class="btn" data-target="menu" aria-expanded="false">Menu</button>
-            <button class="btn" data-target="drawer" aria-expanded="false">Drawer</button>
-            <button class="btn" data-target="dialog" aria-expanded="false">Dialog</button>
+            <button class="btn" data-target="menu" aria-expanded="false" aria-controls="menu">Open menu</button>
+            <button class="btn" data-target="drawer" aria-expanded="false" aria-controls="drawer">Open drawer</button>
+            <button class="btn" data-target="dialog" aria-expanded="false" aria-controls="dialog">Open dialog</button>
           </div>
-          <div class="grp" style="margin-top:var(--sp-4)"><div class="bar w60"></div><div class="bar w90"></div><div class="bar w40"></div><div class="bar w90"></div></div>
+          <div class="grp mt-4"><div class="bar w60"></div><div class="bar w90"></div><div class="bar w40"></div><div class="bar w90"></div></div>
         </div>
         <div class="pop float mv" id="menu"><div class="item">Rename</div><div class="item">Duplicate</div><div class="item">Archive</div></div>
-        <aside class="drawer mv" id="drawer"><h4>Details</h4><div class="c-muted" style="font-size:14px">Slides from the edge it’s attached to. The page steps aside with it.</div><button class="btn" data-target="drawer">Close</button></aside>
-        <div class="dialog-wrap"><div class="dialog mv" id="dialog" role="dialog" aria-label="Delete project"><h4>Delete project</h4><div class="c-muted" style="font-size:14px">This can’t be undone.</div><div class="btns"><button class="btn primary" data-target="dialog">Delete project</button><button class="btn" data-target="dialog">Cancel</button></div></div></div>
+        <aside class="drawer mv" id="drawer"><h4>Details</h4><div class="c-muted">Slides from the edge it’s attached to. The page steps aside with it.</div><button class="btn" data-target="drawer">Close drawer</button></aside>
+        <div class="dialog-wrap"><div class="dialog mv" id="dialog" role="dialog" aria-label="Delete project"><h4>Delete project</h4><div class="c-muted">This can’t be undone.</div><div class="btns"><button class="btn primary" data-target="dialog">Delete project</button><button class="btn" data-target="dialog">Cancel</button></div></div></div>
       </div>
       <p class="note">The menu grows from its button, the drawer from its edge, the dialog from its centre. Click again while one is moving: it reverses from where it is. Each one leaves in 150ms and arrives in 250ms.</p>
 
@@ -1182,7 +1227,16 @@ color: var(--gray-500);</pre></div></figure>
           <h3>Panels open as trays</h3>
           <p>A tray slides out from the edge it’s attached to on the drawer curve, 250ms in and 150ms out. Whatever sits beside it steps aside with the same timing and direction.</p>
         </div>
-        <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">The drawer in the playground above is the pattern. Open it and watch the page move with it.</p></div></figure>
+        <figure class="ex"><figcaption>Do</figcaption><div class="ex-body"><p class="c-muted">The drawer in the playground above is the pattern. Open it and watch the page move with it.</p></div></figure>
+      </article>
+
+      <article class="p" data-editor>
+        <div class="text">
+          <div class="eyebrow">Editor</div>
+          <h3>A tray can be grabbed mid-motion</h3>
+          <p>If someone catches the tray while it opens or closes, it follows the pointer from where it is, and the release keeps its speed. The edge of the tray is a handle even when it has no visible grip.</p>
+        </div>
+        <figure class="ex"><figcaption>See the throw below</figcaption><div class="ex-body"><p class="c-muted">The card under “Carry the throw” works the same way: grab it while it settles and it follows from where it is.</p></div></figure>
       </article>
 
       <article class="p">
@@ -1220,7 +1274,7 @@ color: var(--gray-500);</pre></div></figure>
           <h3>Motion never blocks input</h3>
           <p>You can click, type or drag the moment something starts opening. Use CSS transitions for anything that opens and closes, because a transition can reverse halfway and a keyframe restarts from zero.</p>
         </div>
-        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">Turn on Slow 5×, open the drawer, and click Close before it finishes. It turns around from where it is.</p></div></figure>
+        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body"><p class="c-muted">Turn on Slow 5×, open the drawer, and click Close before it finishes. It turns around from where it is.</p></div></figure>
       </article>
 
       <article class="p">
@@ -1263,7 +1317,7 @@ color: var(--gray-500);</pre></div></figure>
           <h3>Edges give</h3>
           <p>At a boundary, resist more the further it’s pushed, then spring back on release. A hard stop reads as frozen.</p>
         </div>
-        <figure class="ex"><figcaption>See the drag above</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">Drag the card past either end: it keeps giving, less with every pixel, and returns on release. Nothing locks.</p></div></figure>
+        <figure class="ex"><figcaption>See the drag above</figcaption><div class="ex-body"><p class="c-muted">Drag the card past either end: it keeps giving, less with every pixel, and returns on release. Nothing locks.</p></div></figure>
       </article>
 
       <article class="p">
@@ -1315,7 +1369,7 @@ color: var(--gray-500);</pre></div></figure>
           <p>Enter from <code>scale(0.95)</code> with opacity 0, or a 4px to 8px nudge. Never from <code>scale(0)</code>.</p>
         </div>
         <figure class="ex" data-replay><figcaption>Do, then avoid</figcaption><div class="ex-body">
-          <div class="enter"><div><div class="sq good rp"></div><div class="c-faint" style="margin-top:var(--sp-2)">From 0.95</div></div><div><div class="sq bad rp"></div><div class="c-faint" style="margin-top:var(--sp-2)">From 0</div></div></div>
+          <div class="enter"><div><div class="sq good rp"></div><div class="c-faint mt-2">From 0.95</div></div><div><div class="sq bad rp"></div><div class="c-faint mt-2">From 0</div></div></div>
           <button class="btn replay" data-replay-btn>Replay</button>
         </div></figure>
       </article>
@@ -1325,7 +1379,7 @@ color: var(--gray-500);</pre></div></figure>
           <h3>One change, one movement</h3>
           <p>When one thing opens and another steps aside, they share timing and direction so it reads as one event.</p>
         </div>
-        <figure class="ex"><figcaption>See the drawer</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">In the playground, the page shifts 12px with the drawer on the same curve and duration.</p></div></figure>
+        <figure class="ex"><figcaption>See the drawer</figcaption><div class="ex-body"><p class="c-muted">In the playground, the page shifts 12px with the drawer on the same curve and duration.</p></div></figure>
       </article>
 
       <article class="p">
@@ -1385,7 +1439,7 @@ color: var(--gray-500);</pre></div></figure>
           <h3>Sound and haptics land on the same frame</h3>
           <p>Fire them on the cause, on the same frame as the visual, and keep them for commit, success and error. Anything more trains people to ignore them.</p>
         </div>
-        <figure class="ex"><figcaption>If you use them</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">A toggle clicks on the frame it flips. A failed save buzzes on the frame the error appears. A scroll gesture stays silent.</p></div></figure>
+        <figure class="ex"><figcaption>If you use them</figcaption><div class="ex-body"><p class="c-muted">A toggle clicks on the frame it flips. A failed save buzzes on the frame the error appears. A scroll gesture stays silent.</p></div></figure>
       </article>
 
       <article class="p">
@@ -1393,7 +1447,7 @@ color: var(--gray-500);</pre></div></figure>
           <h3>Bounce follows momentum, and nothing loops for attention</h3>
           <p>A release that carried speed can overshoot. A loader can too. A control that simply appeared doesn’t. A loader is the only thing that loops, and only while you’re waiting.</p>
         </div>
-        <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">Pulsing dots, shimmer, breathing glows, marquees, tickers and parallax.</p></div></figure>
+        <figure class="ex"><figcaption>Avoid</figcaption><div class="ex-body"><p class="c-muted">Pulsing dots, shimmer, breathing glows, marquees, tickers and parallax.</p></div></figure>
       </article>
 
       <article class="p">
@@ -1401,15 +1455,15 @@ color: var(--gray-500);</pre></div></figure>
           <h3>Reduced motion gets the same end state</h3>
           <p>With reduced motion on, things fade instead of move, and nothing depends on seeing the animation to make sense. Reduced transparency makes floating surfaces solid; more contrast gives edges a defined boundary. Neither loses information.</p>
         </div>
-        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">Switch on Reduced motion above, then open the drawer. It fades in at its final position.</p></div></figure>
+        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body"><p class="c-muted">Switch on Reduced motion above, then open the drawer. It fades in at its final position.</p></div></figure>
       </article>
 
       <article class="p">
         <div class="text">
           <h3>Watch it before you ship it</h3>
-          <p>Build the interaction before you judge it, because motion and visuals are designed together, not in layers. Play it at normal speed, then slowed down 5x, and look at the frames in between. Look again the next day.</p>
+          <p>Build the interaction before you judge it, because motion and visuals are designed together, not in layers. Play it at normal speed, then slowed down 5×, and look at the frames in between. Look again the next day.</p>
         </div>
-        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body"><p class="c-muted" style="font-size:14px">Slow 5× above stretches every duration on this page.</p></div></figure>
+        <figure class="ex"><figcaption>Try it</figcaption><div class="ex-body"><p class="c-muted">Slow 5× above stretches every duration on this page.</p></div></figure>
       </article>
     </section>
 
@@ -1423,7 +1477,7 @@ color: var(--gray-500);</pre></div></figure>
           <div class="tb-wrap"><div class="tb-label"><span>Fast</span><span class="mono">150ms</span></div><div class="timebar rp" style="transition:transform var(--t-fast) var(--ease-out)"></div></div>
           <div class="tb-wrap"><div class="tb-label"><span>Normal</span><span class="mono">250ms</span></div><div class="timebar rp" style="transition:transform var(--t-normal) var(--ease-out)"></div></div>
           <div class="tb-wrap"><div class="tb-label"><span>Slow</span><span class="mono">500ms</span></div><div class="timebar rp" style="transition:transform var(--t-slow) var(--ease-out)"></div></div>
-          <div class="btns replay"><button class="btn" data-replay-btn>Replay</button><button class="btn primary">Press me</button></div>
+          <button class="btn replay" data-replay-btn>Replay</button>
         </div></figure>
       </div>
 
@@ -1496,7 +1550,7 @@ color: var(--gray-500);</pre></div></figure>
     <section id="build">
       <h2>Build notes for the web</h2>
       <p class="lede">How to meet the rules above in HTML and CSS.</p>
-      <div class="slop">
+      <div class="cards">
         <div><h3>Type</h3><p>Ship <code>.woff2</code>. Font smoothing on the root. <code>tabular-nums</code> for changing numbers. <code>text-wrap: balance</code> on headings, <code>pretty</code> on descriptions. <code>overflow-wrap: break-word</code> for long words. <code>text-underline-position: from-font</code>.</p></div>
         <div><h3>Colour</h3><p>One way to switch themes: <code>prefers-color-scheme</code> or a <code>.dark</code> class, never both. <code>in oklab</code> keeps a gradient’s brightness even.</p></div>
         <div><h3>Images</h3><p><code>outline: 1px solid rgb(0 0 0 / 0.08); outline-offset: -1px</code>, with white in dark mode.</p></div>
@@ -1525,13 +1579,24 @@ color: var(--gray-500);</pre></div></figure>
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
+// Per-viewer memory for the layer and the checklist. The page works the same without it
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem('principles:' + k)); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem('principles:' + k, JSON.stringify(v)); } catch {} }
+};
+
 // Layer switch
 const layerBtns = $$('[data-layer-btn]');
+function setLayer(layer) {
+  document.body.dataset.layer = layer;
+  layerBtns.forEach(x => x.setAttribute('aria-checked', String(x.dataset.layerBtn === layer)));
+}
 layerBtns.forEach(b => b.addEventListener('click', () => {
-  document.body.dataset.layer = b.dataset.layerBtn;
-  layerBtns.forEach(x => x.setAttribute('aria-checked', String(x === b)));
+  setLayer(b.dataset.layerBtn);
+  store.set('layer', b.dataset.layerBtn);
   updateProgress();
 }));
+if (store.get('layer') === 'editor') setLayer('editor');
 
 // Switches
 $$('[role="switch"]').forEach(s => s.addEventListener('click', () => {
@@ -1551,12 +1616,19 @@ function toggle(id) {
   });
   el.classList.toggle('open', open);
   if (id === 'drawer') stage.classList.toggle('drawer-open', open);
-  $$('[data-target="' + id + '"][aria-expanded]').forEach(b => b.setAttribute('aria-expanded', String(open)));
+  setTrigger(id, open);
 }
 function closeLayer(l) {
   l.classList.remove('open');
   if (l.id === 'drawer') stage.classList.remove('drawer-open');
-  $$('[data-target="' + l.id + '"][aria-expanded]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+  setTrigger(l.id, false);
+}
+// The trigger says what it will do next: "Open menu" or "Close menu"
+function setTrigger(id, open) {
+  $$('[data-target="' + id + '"][aria-expanded]').forEach(b => {
+    b.setAttribute('aria-expanded', String(open));
+    b.textContent = (open ? 'Close ' : 'Open ') + id;
+  });
 }
 $$('[data-target]').forEach(b => b.addEventListener('click', () => toggle(b.dataset.target)));
 document.addEventListener('keydown', e => { if (e.key === 'Escape') layers.forEach(closeLayer); });
@@ -1624,7 +1696,7 @@ $$('[data-press]').forEach(b => {
 (() => {
   const track = $('#drag-track'), card = $('#drag-card'), out = $('#drag-x');
   if (!track) return;
-  const inset = 12;
+  const inset = 4;
   let x = 0, active = false, startX = 0, startPos = 0, lastX = 0, lastT = 0, vx = 0, cancelSpring = null;
   const max = () => Math.max(0, track.clientWidth - card.offsetWidth - inset * 2);
   function place(v) {
@@ -1674,7 +1746,7 @@ $$('[data-press]').forEach(b => {
 (() => {
   const track = $('#flick-track'), card = $('#flick-card'), out = $('#flick-slot');
   if (!track) return;
-  const inset = 12;
+  const inset = 4;
   let index = 0, x = 0, active = false, startX = 0, startPos = 0, lastX = 0, lastT = 0, vx = 0, cancelSpring = null;
   const step = () => Math.max(1, track.clientWidth - card.offsetWidth - inset * 2);
   const slot = i => (step() * i) / 2;
@@ -1731,7 +1803,7 @@ $$('[data-press]').forEach(b => {
   const a = $('#spring-a'), b = $('#spring-b'), run = $('#spring-run');
   if (!a || !b || !run) return;
   let posA = 0, posB = 0, atEnd = false, cancelA = null, cancelB = null;
-  const travel = () => Math.max(0, a.parentElement.clientWidth - a.offsetWidth - 12);
+  const travel = () => Math.max(0, a.parentElement.clientWidth - a.offsetWidth - 8);
   function go() {
     const to = atEnd ? 0 : travel();
     atEnd = !atEnd;
@@ -1800,14 +1872,41 @@ $$('[data-press]').forEach(b => {
   });
 })();
 
+// Errors are found on submit: mark each field, tie the message to it, focus the first
+(() => {
+  const form = $('#submit-form'), status = $('#submit-status');
+  if (!form) return;
+  const checks = [
+    ['#submit-name', v => v.trim() !== ''],
+    ['#submit-email', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)]
+  ];
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    let first = null;
+    checks.forEach(([sel, ok]) => {
+      const input = $(sel), err = $(sel + '-err'), valid = ok(input.value);
+      input.setAttribute('aria-invalid', String(!valid));
+      if (valid) input.removeAttribute('aria-describedby'); else input.setAttribute('aria-describedby', err.id);
+      err.hidden = valid;
+      if (!valid && !first) first = input;
+    });
+    if (first) { status.textContent = ''; first.focus(); return; }
+    status.textContent = 'Saved';
+  });
+})();
+
 // Checklist
-const boxes = () => $$('#checks input').filter(i => i.closest('li').offsetParent !== null);function updateProgress() {
+const checkInputs = $$('#checks input');
+const boxes = () => checkInputs.filter(i => i.closest('li').offsetParent !== null);
+function updateProgress() {
   const visible = boxes();
   $('#total').textContent = visible.length;
   $('#done').textContent = visible.filter(i => i.checked).length;
 }
-$('#checks').addEventListener('change', updateProgress);
-$('#clear').addEventListener('click', () => { $$('#checks input').forEach(i => i.checked = false); updateProgress(); });
+(store.get('checks') || []).forEach(i => { if (checkInputs[i]) checkInputs[i].checked = true; });
+const saveChecks = () => store.set('checks', checkInputs.map((x, i) => x.checked ? i : -1).filter(i => i >= 0));
+$('#checks').addEventListener('change', () => { saveChecks(); updateProgress(); });
+$('#clear').addEventListener('click', () => { checkInputs.forEach(i => i.checked = false); saveChecks(); updateProgress(); });
 updateProgress();
 
 // Active nav
