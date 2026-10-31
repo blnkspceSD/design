@@ -109,9 +109,30 @@ section > .lede { margin-top: var(--space-2); max-width: 65ch; color: var(--colo
 .p h3 { font-size: var(--text-lg); line-height: 1.3; letter-spacing: -0.005em; }
 .p .text > p { margin-top: var(--space-2); color: var(--color-text-muted); }
 .p .text > p, .lede, .note { text-wrap: pretty; }
-.eyebrow { display: none; font-size: var(--text-xs); letter-spacing: 0.01em; color: var(--color-text-faint); margin-bottom: var(--space-1); }
-body[data-layer="editor"] [data-editor] .eyebrow { display: block; }
-body:not([data-layer="editor"]) [data-editor] { display: none; }
+/* Editor layer. Its rules sit one surface step up, so core and editor read as two groups.
+   The padding is pulled back out with a negative margin so text still lines up with core. */
+.eyebrow { font-size: var(--text-sm); font-weight: var(--weight-medium); color: var(--color-text-muted); margin-bottom: var(--space-1); }
+.p[data-editor] { margin-top: var(--space-6); padding: var(--space-4); margin-inline: calc(var(--space-4) * -1); background: var(--color-fill); border-radius: calc(var(--radius-card) + var(--space-4)); }
+.p[data-editor] + .p[data-editor] { margin-top: var(--space-3); }
+.layer-head { padding-top: var(--space-7); }
+.layer-head h3 { font-size: var(--text-lg); line-height: 1.3; letter-spacing: -0.005em; }
+.layer-head p { margin-top: var(--space-2); max-width: 65ch; color: var(--color-text-muted); text-wrap: pretty; }
+.layer-head + .p[data-editor] { margin-top: var(--space-4); }
+.side nav .n { margin-inline-start: var(--space-2); color: var(--color-text-faint); font-variant-numeric: tabular-nums; }
+.layer-note { font-size: var(--text-sm); color: var(--color-text-muted); text-wrap: pretty; }
+body:not([data-layer="editor"]) [data-editor], body:not([data-layer="editor"]) .side nav .n { display: none; }
+/* Switching layers, never on page load: editor rules rise into place, and leave faster with a small blur */
+@media (prefers-reduced-motion: no-preference) {
+  body.layer-anim [data-editor] { transition: opacity var(--t-normal) var(--ease-out), transform var(--t-normal) var(--ease-out), filter var(--t-normal) var(--ease-out), display var(--t-normal) allow-discrete; }
+  body.layer-anim:not([data-layer="editor"]) [data-editor] { opacity: 0; transform: translateY(var(--space-1)); filter: blur(var(--exit-blur)); transition-duration: var(--t-fast); }
+  @starting-style { body.layer-anim[data-layer="editor"] [data-editor] { opacity: 0; transform: translateY(var(--space-2)) scale(0.98); } }
+  body.layer-anim[data-reduced] [data-editor] { transform: none !important; filter: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.layer-anim [data-editor] { transition: opacity var(--t-fast) var(--ease-out), display var(--t-fast) allow-discrete; }
+  body.layer-anim:not([data-layer="editor"]) [data-editor] { opacity: 0; }
+  @starting-style { body.layer-anim[data-layer="editor"] [data-editor] { opacity: 0; } }
+}
 @media (max-width: 56rem) {
   .shell { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 var(--space-4); }
   .side { position: static; height: auto; padding-bottom: 0; }
@@ -119,6 +140,7 @@ body:not([data-layer="editor"]) [data-editor] { display: none; }
   .side nav a { margin-inline: 0; background: var(--color-fill); border-radius: var(--radius-pill); padding: var(--space-1) var(--space-3); white-space: nowrap; }
   .side .files { display: none; }
   .p { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+  .p[data-editor] { margin-inline: calc(var(--space-3) * -1); padding: var(--space-3); border-radius: calc(var(--radius-card) + var(--space-3)); }
   .hero h1 { font-size: var(--text-xl); letter-spacing: -0.015em; }
 }
 
@@ -404,6 +426,7 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
       <button type="button" role="radio" aria-checked="true" data-layer-btn="core">Core</button>
       <button type="button" role="radio" aria-checked="false" data-layer-btn="editor">+ Editor</button>
     </div>
+    <p class="layer-note" id="layer-note" role="status">Core rules only. They apply to any product.</p>
     <nav aria-label="Sections">
       <a href="#decide">How to decide</a>
       <a href="#layout">Layout and spacing</a>
@@ -427,7 +450,7 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
   <main id="main">
     <header class="hero">
       <h1>Design and motion principles</h1>
-      <p>How an interface looks, reads, behaves and moves. Eight principles decide what to build; the rules below say how. The Do specimens on this page follow them. Switch on the editor layer to add the rules for editors and workspaces.</p>
+      <p>How an interface looks, reads, behaves and moves. Eight principles decide what to build; the rules below say how. The Do specimens on this page follow them. Switch on the editor layer to add the rules for editors and workspaces. They appear at the end of each section they change, one surface step up from the core rules.</p>
     </header>
 
     <!-- DECIDE -->
@@ -517,9 +540,14 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
         </div>
       </article>
 
+      <div class="layer-head" data-editor>
+        <h3>For editors and workspaces</h3>
+        <p>Tools people work in for hours add these to the layout rules above.</p>
+      </div>
+
       <article class="p" data-editor>
         <div class="text">
-          <div class="eyebrow">Editor</div>
+          <div class="eyebrow">Editor rule, new</div>
           <h3>A calm, dense tool</h3>
           <p>A tool people work in for hours fits a lot on screen and stays steady: little layout variety, panels that keep their place and shape. The variety goes into the content.</p>
         </div>
@@ -534,7 +562,7 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
 
       <article class="p" data-editor>
         <div class="text">
-          <div class="eyebrow">Editor</div>
+          <div class="eyebrow">Editor rule, new</div>
           <h3>Open beside, not instead</h3>
           <p>Settings, menus and side panels open as trays next to what you clicked, so you never lose your place. Full screen swaps are for leaving the current task.</p>
         </div>
@@ -550,7 +578,7 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
 
       <article class="p" data-editor>
         <div class="text">
-          <div class="eyebrow">Editor</div>
+          <div class="eyebrow">Editor rule, stricter than “A control sits with what it changes”</div>
           <h3>Group by what it changes</h3>
           <p>Controls that change the same thing sit together in one section, not spread across cards.</p>
         </div>
@@ -571,7 +599,7 @@ body[data-reduced] .swap .ico.out, body[data-reduced] .xcard, body[data-reduced]
 
       <article class="p" data-editor>
         <div class="text">
-          <div class="eyebrow">Editor</div>
+          <div class="eyebrow">Editor rule, stricter than “Nothing scrolls sideways”</div>
           <h3>Panels never scroll sideways</h3>
           <p>Core allows wide content like a table. A panel has no such exception: if something doesn’t fit, it wraps. Vertical scroll is fine.</p>
         </div>
@@ -716,9 +744,14 @@ color: var(--gray-500);</pre></div></figure>
         </div>
       </article>
 
+      <div class="layer-head" data-editor>
+        <h3>For editors and workspaces</h3>
+        <p>Tools people work in for hours add these to the colour and surface rules above.</p>
+      </div>
+
       <article class="p" data-editor>
         <div class="text">
-          <div class="eyebrow">Editor</div>
+          <div class="eyebrow">Editor rule, repeats “Surfaces stay quiet” for panels</div>
           <h3>Panels stay quiet</h3>
           <p>Panels use neutral surfaces with one accent. If a panel draws the eye away from the main content, it is too loud.</p>
         </div>
@@ -731,7 +764,7 @@ color: var(--gray-500);</pre></div></figure>
 
       <article class="p" data-editor>
         <div class="text">
-          <div class="eyebrow">Editor</div>
+          <div class="eyebrow">Editor rule, stricter than “Nested corners are concentric”</div>
           <h3>Corners follow the role</h3>
           <p>One radius for floating panels, a smaller one for cards inside them, pills for controls. The card’s radius is the panel’s radius minus the padding, so the corners stay concentric. No card inside a card.</p>
         </div>
@@ -865,9 +898,14 @@ color: var(--gray-500);</pre></div></figure>
         </div></figure>
       </article>
 
+      <div class="layer-head" data-editor>
+        <h3>For editors and workspaces</h3>
+        <p>Tools people work in for hours add these to the type and word rules above.</p>
+      </div>
+
       <article class="p" data-editor>
         <div class="text">
-          <div class="eyebrow">Editor</div>
+          <div class="eyebrow">Editor rule, stricter than “Two typefaces, each with a job”</div>
           <h3>Live values are mono and tabular</h3>
           <p>Counts and values you compare use the mono typeface. Numbers that change while you watch use tabular figures, in one format across a panel, so they don’t jiggle.</p>
         </div>
@@ -887,7 +925,7 @@ color: var(--gray-500);</pre></div></figure>
 
       <article class="p" data-editor>
         <div class="text">
-          <div class="eyebrow">Editor</div>
+          <div class="eyebrow">Editor rule, stricter than “Labels name things”</div>
           <h3>Readouts earn their place</h3>
           <p>A value shown in a panel is one someone acts on. “Opacity” next to a slider is enough.</p>
         </div>
@@ -899,7 +937,7 @@ color: var(--gray-500);</pre></div></figure>
 
       <article class="p" data-editor>
         <div class="text">
-          <div class="eyebrow">Editor</div>
+          <div class="eyebrow">Editor rule, repeats “Labels name things” and “Buttons say what happens” for panels</div>
           <h3>Panel words are short</h3>
           <p>Labels name things, buttons are verb plus object, and placeholders are a word or two.</p>
         </div>
@@ -1208,9 +1246,14 @@ color: var(--gray-500);</pre></div></figure>
         </div>
       </article>
 
+      <div class="layer-head" data-editor>
+        <h3>For editors and workspaces</h3>
+        <p>Tools people work in for hours add these to the motion rules. The core rules continue after them.</p>
+      </div>
+
       <article class="p" data-editor>
         <div class="text">
-          <div class="eyebrow">Editor</div>
+          <div class="eyebrow">Editor rule, stricter than “Animate by how often it happens”</div>
           <h3>Constant actions don’t move</h3>
           <p>Dragging a slider, scrubbing a value, undo and redo, picking a layer, and nudging with arrow keys get no motion, or a colour change only. A selected item is a surface step.</p>
         </div>
@@ -1223,7 +1266,7 @@ color: var(--gray-500);</pre></div></figure>
 
       <article class="p" data-editor>
         <div class="text">
-          <div class="eyebrow">Editor</div>
+          <div class="eyebrow">Editor rule, stricter than “Nothing appears out of nowhere”</div>
           <h3>Panels open as trays</h3>
           <p>A tray slides out from the edge it’s attached to on the drawer curve, 250ms in and 150ms out. Whatever sits beside it steps aside with the same timing and direction.</p>
         </div>
@@ -1232,7 +1275,7 @@ color: var(--gray-500);</pre></div></figure>
 
       <article class="p" data-editor>
         <div class="text">
-          <div class="eyebrow">Editor</div>
+          <div class="eyebrow">Editor rule, stricter than “Start from where it is”</div>
           <h3>A tray can be grabbed mid-motion</h3>
           <p>If someone catches the tray while it opens or closes, it follows the pointer from where it is, and the release keeps its speed. The edge of the tray is a handle even when it has no visible grip.</p>
         </div>
@@ -1587,11 +1630,22 @@ const store = {
 
 // Layer switch
 const layerBtns = $$('[data-layer-btn]');
+const editorRules = $$('.p[data-editor]').length, editorChecks = $$('#checks li[data-editor] label').length;
+// Each section link shows how many rules the editor layer adds there
+$$('.side nav a').forEach(a => {
+  const sec = $(a.getAttribute('href'));
+  const count = sec ? $$('.p[data-editor], li[data-editor] label', sec).length : 0;
+  if (count) a.insertAdjacentHTML('beforeend', `<span class="n">+${count}</span>`);
+});
 function setLayer(layer) {
   document.body.dataset.layer = layer;
   layerBtns.forEach(x => x.setAttribute('aria-checked', String(x.dataset.layerBtn === layer)));
+  $('#layer-note').textContent = layer === 'editor'
+    ? `Core plus ${editorRules} editor rules and ${editorChecks} checks, at the end of each section they change.`
+    : 'Core rules only. They apply to any product.';
 }
 layerBtns.forEach(b => b.addEventListener('click', () => {
+  document.body.classList.add('layer-anim');
   setLayer(b.dataset.layerBtn);
   store.set('layer', b.dataset.layerBtn);
   updateProgress();

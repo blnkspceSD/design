@@ -6,6 +6,8 @@ Some kinds of product need more than this. Those rules live in an extension that
 
 - [principles-editor.md](principles-editor.md): editors and workspaces, the tools people work in for hours.
 
+Where a section has editor rules, a note at its end says how many and links to them.
+
 ## How to decide
 
 When two rules pull against each other, these eight break the tie. They decide what to build as much as how it looks.
@@ -28,6 +30,8 @@ When two rules pull against each other, these eight break the tie. They decide w
 - **Same thing, same size, same line.** Rows in one list share one height and one gap; sibling cards share one padding. Icons sit in one column, labels start on one line, numbers align right. Line things up by eye, not by the numbers: a triangle or a round shape often needs a small optical nudge to look centred, and a button with an icon gets slightly less padding on the icon side. Any other stray margin or translate is a bug.
 - **Nothing scrolls sideways.** If something doesn't fit, it wraps. Vertical scroll is fine. The exception is content that is wide by nature, like a data table or a map.
 
+> **Editors and workspaces** add 4 rules to this section: [Layout and spacing](principles-editor.md#layout-and-spacing).
+
 ### Colour and surfaces
 
 - **Surfaces stay quiet.** Use neutral surfaces with one accent. If the chrome draws the eye away from the main content, it is too loud.
@@ -38,6 +42,8 @@ When two rules pull against each other, these eight break the tie. They decide w
 - **Images get a hairline edge.** A 1px outline set 1px inside the image: black at 8% in light mode, white at 8% in dark. It keeps an image's edge from bleeding into the surface, and it's the one border and the one tint allowed outside the ramp.
 - **Values come from tokens.** Colours, radii, spacing, durations and easings come from one set of tokens. No one-off numbers in a component. If a token is wrong, change the token. Components use tokens named for their job, like `--color-text-muted` or `--color-accent-solid`, never raw values like `--blue-500`. Every step in a scale has a use; drop the steps nothing uses.
 - **Dark mode is its own palette.** Build it on purpose instead of inverting light mode. Check contrast against the surface directly behind each element, not the page.
+
+> **Editors and workspaces** add 2 rules to this section: [Colour and surfaces](principles-editor.md#colour-and-surfaces).
 
 ### Type, words and icons
 
@@ -50,6 +56,8 @@ When two rules pull against each other, these eight break the tie. They decide w
 - **Punctuation is typographic.** Curly quotes, an en dash for ranges (2–4), an em dash for asides, and the … character instead of three dots. Write words in normal case and let styling change the case.
 - **Cut text stays reachable.** When text is cut with an ellipsis, the full text is in a tooltip or an expanded view. Long words, links and IDs wrap inside their container; short labels don't wrap.
 - **One icon set, used where it helps.** Every icon comes from one set, at one size scale. No hand-drawn one-offs. An icon takes the colour and stroke weight of the text beside it and sits in a fixed-width box so labels line up. It earns its place by making something faster to find; an icon-only button always has a tooltip and an accessible name.
+
+> **Editors and workspaces** add 3 rules to this section: [Type and words](principles-editor.md#type-and-words).
 
 ### Interaction and states
 
@@ -122,6 +130,8 @@ Content is allowed to move as much as it likes. The interface around it moves on
 - **Reduced motion gets the same end state.** With reduced motion on, things fade instead of move, and nothing depends on seeing the animation to make sense. Reduced transparency makes floating surfaces solid; more contrast gives edges a defined boundary. Neither loses information.
 - **Watch it before you ship it.** Build the interaction before you judge it, because motion and visuals are designed together, not in layers. Play it at normal speed, then slowed down 5x in DevTools, and look at the frames in between. Look again the next day.
 
+> **Editors and workspaces** add 3 rules to this section: [Motion](principles-editor.md#motion).
+
 ## Motion values
 
 The values follow Emil Kowalski's. Keep them as tokens and use the token name in code, not the number.
@@ -181,6 +191,8 @@ For anything a finger drives, springs replace durations. Damping is overshoot (`
 - [ ] Buttons read as verb plus object, with no marketing words or emoji
 - [ ] Keyboard focus is visible everywhere it can land
 - [ ] Watched at normal speed and slowed down
+
+> **Editors and workspaces** add 8 checks: [Before shipping an editor change](principles-editor.md#before-shipping-an-editor-change).
 
 ## Build notes for the web
 
